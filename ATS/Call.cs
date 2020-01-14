@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 namespace ATS
 {
     public struct Call
-    {     
+    {
+        DateTime Date;
         TimeSpan Duration;
         CallType Type;
 
-        public Call(TimeSpan duration, CallType type)
+        public Call(DateTime date, TimeSpan duration, CallType type)
         {
+            Date = date;
             Duration = duration;
             Type = type;
         }

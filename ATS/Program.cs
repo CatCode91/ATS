@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ATS.Tariffs;
+using ATS.Terminals;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +12,14 @@ namespace ATS
     {
         static void Main(string[] args)
         {
+            Station<Dogovor> ats = new Station<Dogovor>("VELCOM");
+
+            Dogovor dogovor = ats.CreateDogovor(new EasyTariff());
+
+            while (true)
+            {
+                Console.ReadKey();
+            }
         }
     }
 }

@@ -10,7 +10,6 @@ namespace ATS
     {
         Connected,
         Opened,
-        Dialing,
         Busy,
         Closed,
         Disconnected

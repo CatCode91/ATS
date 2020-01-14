@@ -8,10 +8,11 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ATS</RootNamespace>
     <AssemblyName>ATS</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -44,12 +45,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Call.cs" />
-    <Compile Include="Company.cs" />
+    <Compile Include="Station.cs" />
     <Compile Include="Dogovor.cs" />
     <Compile Include="Billing.cs" />
-    <Compile Include="Tariffs\Easy.cs" />
-    <Compile Include="Tariffs\Full.cs" />
-    <Compile Include="Tariffs\Medium.cs" />
+    <Compile Include="Tariffs\EasyTariff.cs" />
+    <Compile Include="Tariffs\FullTariff.cs" />
+    <Compile Include="Tariffs\MediumTariff.cs" />
     <Compile Include="Tariffs\Tariff.cs" />
     <Compile Include="Terminals\ITerminal.cs" />
     <Compile Include="Port.cs" />
@@ -60,7 +61,7 @@
     <Compile Include="Terminals\TerminalEventArgs.cs" />
     <Compile Include="Terminals\Fax.cs" />
     <Compile Include="Terminals\MobilePhone.cs" />
-    <Compile Include="Terminals\StationaryPhone.cs" />
+    <Compile Include="Terminals\Phone.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -8,18 +8,18 @@ namespace ATS
 {
     public abstract class Terminal: ITerminal
     {
-        private int _number;
         private Port _port;
 
         protected Terminal(Dogovor dogovor)
         {
-            _port = new Port(dogovor.DogovorNumber);
+            _port = new Port(dogovor);
         }
 
         public void StartDial(int number)
         {
             if (_port.Status == PortStatus.Disconnected)
             {
+                Console.WriteLine("Сначала подключите терминал к порту");
                 return;
             }
 
@@ -28,7 +28,7 @@ namespace ATS
 
         public void FinishDial()
         {
-            _port.FinishTalking();
+            _port.FinishTalking(new Call());
         }
 
         public void ConnectPort()

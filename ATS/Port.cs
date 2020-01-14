@@ -11,10 +11,14 @@ namespace ATS
         private int _number;
         private PortStatus _status;
         private ITerminal _terminal;
+        private Call currentCall;
 
-        public Port(int number)
+        private List<Call> callsHistory;
+
+        public Port(Dogovor dogovor)
         {
-            _number = number;
+            _number = dogovor.DogovorNumber;
+            callsHistory = new List<Call>();
         }
 
         public int Number => _number;
@@ -44,7 +48,7 @@ namespace ATS
 
         public void Calling(int number)
         {
-
+            Status = PortStatus.Busy;
         }
 
         public void Talking()
@@ -52,8 +56,9 @@ namespace ATS
             Status = PortStatus.Busy;
         }
 
-        public void FinishTalking()
+        public void FinishTalking(Call call)
         {
+            callsHistory.Add(call);
             Status = PortStatus.Disconnected;
         }
 
