@@ -23,8 +23,8 @@ bld/
 [Ll]og/
 
 /.vs
-/1_Game/bin
-/1_Game/obj
+/ATS/bin
+/ATS/obj
 
 # Visual Studio 2015 cache/options directory
 .vs/
