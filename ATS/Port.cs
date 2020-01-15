@@ -8,36 +8,43 @@ namespace ATS
 {
     public class Port
     {
-        private int _number;
-        private PortStatus _status;
+        //терминал, подключенный к порту
         private ITerminal _terminal;
+        //текущий звонок на порту
         private Call currentCall;
-
+        //история звонков
         private List<Call> callsHistory;
+
+        public event PortStateHandler StateChanging;
+
+        public Port()
+        {
+            Status = PortStatus.Free;
+        }
 
         public Port(Dogovor dogovor)
         {
-            _number = dogovor.DogovorNumber;
-            callsHistory = new List<Call>();
+            Number = dogovor.DogovorNumber;
+            Status = PortStatus.Disconnected;
         }
 
-        public int Number => _number;
+        public int Number { get; }
         public PortStatus Status { get; private set; }
 
-        public void Connect(ITerminal terminal)
+        public void ConnectToPort(ITerminal terminal)
         {
-            if(terminal == null)
+            if(_terminal == null)
             {
-                terminal = _terminal;
+               _terminal = terminal;
             }
 
+            StateChanging?.Invoke(this, new PortEventArgs(Status));
             Status = PortStatus.Connected;
         }
 
-        public void Disconnect(ITerminal terminal)
+        public void DisconnectPort(ITerminal terminal)
         {
             terminal = null;
-
             Status = PortStatus.Disconnected;
         }
 

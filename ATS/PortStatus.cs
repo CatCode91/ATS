@@ -8,6 +8,7 @@ namespace ATS
 {
     public enum PortStatus
     {
+        Free,
         Connected,
         Opened,
         Busy,

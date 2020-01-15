@@ -8,11 +8,12 @@ namespace ATS
 {
     public abstract class Terminal: ITerminal
     {
-        private Port _port;
+        private Dogovor _dogovor;
+       
 
         protected Terminal(Dogovor dogovor)
         {
-            _port = new Port(dogovor);
+            _dogovor = dogovor;
         }
 
         public void StartDial(int number)
@@ -31,14 +32,14 @@ namespace ATS
             _port.FinishTalking(new Call());
         }
 
-        public void ConnectPort()
+        public void Connect()
         {
-            _port.Connect(this);
+            ConnectToPort(this);
         }
 
-        public void DisconnectPort()
+        public void Disconnect()
         {
-            _port.Disconnect(this);
+            _port.DisconnectPort(this);
         }
     }
 }

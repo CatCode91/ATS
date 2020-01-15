@@ -12,8 +12,8 @@ namespace ATS
 
         void FinishDial();
 
-        void ConnectPort();
+        void Connect();
 
-        void DisconnectPort();
+        void Disconnect();
     }
 }

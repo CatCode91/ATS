@@ -12,14 +12,17 @@ namespace ATS
     {
         static void Main(string[] args)
         {
-            Station<Dogovor> ats = new Station<Dogovor>("VELCOM");
+            Station ats = Station.GetInstance("VELCOM");
 
             Dogovor dogovor = ats.CreateDogovor(new EasyTariff());
+            Dogovor dogovor1 = ats.CreateDogovor(new FullTariff());
 
-            while (true)
-            {
-                Console.ReadKey();
-            }
+            Phone phone = ats.GetPhone(dogovor);
+            Phone phone2 = ats.GetPhone(dogovor);
+
+            phone.Connect();
+
+            Console.ReadKey();
         }
     }
 }

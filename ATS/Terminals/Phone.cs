@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ATS.Terminals
 {
-    public class MobilePhone : Terminal
+    public class Phone : Terminal
     {
-        public MobilePhone(Dogovor dogovor) : base(dogovor)
+        public Phone(Dogovor dogovor) : base(dogovor)
         {
         }
     }

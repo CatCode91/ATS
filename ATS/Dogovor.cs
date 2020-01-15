@@ -11,20 +11,17 @@ namespace ATS
     {
         private DateTime _dateOfCreation;
         private Tariff _tariff;
-        private Port _port;
 
         public Dogovor(int dogovorNumber,Tariff tariff)
         {
             DogovorNumber = dogovorNumber;
             _tariff = tariff;
             _dateOfCreation = DateTime.Today;
-
         }
     
         public int DogovorNumber { get;}
         public DateTime DateOfCreation => _dateOfCreation;
         public Tariff Tariff => _tariff;
-        public Port Port => _port;
 
         public void ChangeTariff(Tariff tariff)
         {
@@ -42,5 +39,6 @@ namespace ATS
             
 
         }
+
     }
 }
