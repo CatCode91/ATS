@@ -29,7 +29,7 @@ namespace ATSLibrary
         public void ChangeTariff(Tariff tariff)
         {
             var today = DateTime.Today;
-            if (_dateOfCreation > today.AddMonths(-1))
+            if (today.AddMonths(-1) >= DateOfCreation)
             {
                 _tariff = tariff;
                 Console.WriteLine($"Поздравляем! Ваш тариф изменен на - {tariff.Name}");

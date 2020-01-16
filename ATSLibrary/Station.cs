@@ -58,13 +58,49 @@ namespace ATSLibrary
             for (int i = 0; i <ports.Length; i++)
             {
                 ports[i] = new Port();
-                ports[i].StateChanging += StateChanging;
+                ports[i].PortConnected += Station_PortConnected;
+                ports[i].PortDisconnected += Station_PortDisconnected;
+                ports[i].CallNotify += Station_CallNotify;
             }
         }
 
-        private void StateChanging(Port sender, PortEventArgs e)
+        private void Station_PortConnected(Port sender, PortEventArgs e)
         {
-           
-        }     
+            Console.WriteLine(e.Message);
+            sender.PortStatusChange(PortStatus.Connected);
+        }
+
+        private void Station_PortDisconnected(Port sender, PortEventArgs e)
+        {
+            Console.WriteLine(e.Message);
+            sender.PortStatusChange(PortStatus.Disconnected);
+        }
+
+        private void Station_CallNotify(Port sender, PortEventArgs e)
+        {
+            var callingPort = ports.First(x => x.AbonentNumber == e.DialNumber);
+
+            if (callingPort == null)
+            {
+                Console.WriteLine("Вызываемого Вами абонента не существует");
+                return;
+            }
+
+            if (callingPort.Status == PortStatus.Busy)
+            {
+                Console.WriteLine("Вызываемый Вами абонент занят");
+                return;
+            }
+
+            if (callingPort.Status == PortStatus.Disconnected)
+            {
+                Console.WriteLine("Вызываемый Вами абонент недоступен");
+                return;
+            }
+
+            Console.WriteLine("Вызов абонента...");
+            callingPort.IncomeCalling(sender.AbonentNumber);
+        }
+   
     }
 }

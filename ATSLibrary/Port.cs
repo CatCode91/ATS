@@ -19,25 +19,28 @@ namespace ATSLibrary
         //история звонков
         private List<Call> callsHistory;
 
-        internal event PortStateHandler StateChanging;
+        internal event PortStateHandler PortConnected;
+        internal event PortStateHandler PortDisconnected;
+        internal event PortStateHandler CallNotify;
+        internal event PortStateHandler RingNotify;
 
         internal Port()
         {
             Status = PortStatus.Free;
         }
 
+
         public int AbonentNumber => _abonentNumber;
         public PortStatus Status { get; private set; }
 
         internal int PortNumber => _portNumber;
+
         internal void ConnectTerminal(ITerminal terminal)
         {
             if (_terminal == null)
             {
                 _terminal = terminal;
-                Console.WriteLine($"Port №{PortNumber}:  Устройство подключено к порту!");
-                StateChanging?.Invoke(this, new PortEventArgs(Status));
-                Status = PortStatus.Connected;
+                PortConnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Устройство подключено к порту!"));
             }
 
             else
@@ -47,7 +50,6 @@ namespace ATSLibrary
 
            
         }      
-
         internal void DisconnectTerminal(ITerminal terminal,ref Port port)
         {
             if (_terminal == null)
@@ -64,31 +66,44 @@ namespace ATSLibrary
 
             _terminal = null;
             port = null;
-            Status = PortStatus.Disconnected;
-            Console.WriteLine($"Port №{PortNumber}:  Устройство отключено");
+            PortDisconnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал отключен от порта!"));
         }
-        internal void Dialing(int number)
+
+        internal void IncomeCalling(int incomeNumber)
         {
-            Status = PortStatus.Busy;
+            RingNotify?.Invoke(this, new PortEventArgs($"Входящий вызов от абонента {incomeNumber}")); ;
         }
-        internal void Calling(int number)
+        internal void OutcomeCalling(int number)
         {
-            Status = PortStatus.Busy;
+            CallNotify?.Invoke(this, new PortEventArgs(number,Status));   
         }
+
         internal void Talking()
         {
             Status = PortStatus.Busy;
         }
+
+        internal void BusySent()
+        {
+
+        }
+
         internal void FinishTalking(Call call)
         {
             callsHistory.Add(call);
-            Status = PortStatus.Disconnected;
+            Status = PortStatus.Connected;
         }
+
         internal void SetAbonentNumber(int portNumber,int abonentNumber)
         {
             _portNumber = portNumber;
             _abonentNumber = abonentNumber;
             Status = PortStatus.Disconnected;  
+        }
+
+        internal void PortStatusChange(PortStatus status)
+        {
+            Status = status;
         }
     }
 }

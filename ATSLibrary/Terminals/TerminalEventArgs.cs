@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATSLibrary.Terminals
 {
-    public delegate void TerminalStateHandler(object sender, TerminalEventArgs e);
+    public delegate void TerminalStateHandler(ITerminal sender, TerminalEventArgs e);
 
     public class TerminalEventArgs
     {

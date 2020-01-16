@@ -22,8 +22,20 @@ namespace ATS
             //получаем порт согласно договора
             Port port = ats.GetPort(dogovor);
 
-        
+            //создаем объект терминала (можно было бы получать из объекта ats (типа выдала стация), но не заморачивался)
+            Phone phone = new Phone("Alcatel");
+            //подписываемся на события звонка при входящем вызове
+            phone.Ringing += Phone_Ringing;
+
             Console.ReadKey();
         }
+
+        private static void Phone_Ringing(ITerminal sender, TerminalEventArgs e)
+        {
+            Console.WriteLine(e.Message);
+            Console.WriteLine($"Ответить - 1, Сбросить - 2");
+            sender.AnswerCall();
+        }
+
     }
 }
