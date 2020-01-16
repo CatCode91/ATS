@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATS
+namespace ATSLibrary.Terminals
 {
     public delegate void TerminalStateHandler(object sender, TerminalEventArgs e);
 

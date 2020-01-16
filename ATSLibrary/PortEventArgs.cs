@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATS
+namespace ATSLibrary
 {
-    public delegate void PortStateHandler(Port sender, PortEventArgs e);
+    internal delegate void PortStateHandler(Port sender, PortEventArgs e);
 
-    public class PortEventArgs : EventArgs
+    internal class PortEventArgs : EventArgs
     {
         public PortEventArgs(PortStatus status)
         {

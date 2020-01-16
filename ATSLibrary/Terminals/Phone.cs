@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATS
+namespace ATSLibrary.Terminals
 {
-    public class Billing
+    public class Phone : Terminal
     {
-    
+        public Phone(string name) : base(name)
+        {
+        }
     }
 }

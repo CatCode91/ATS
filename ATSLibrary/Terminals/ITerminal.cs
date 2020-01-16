@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATS
+namespace ATSLibrary.Terminals
 {
     public interface ITerminal
     {
@@ -12,7 +12,7 @@ namespace ATS
 
         void FinishDial();
 
-        void Connect();
+        void Connect(Port port);
 
         void Disconnect();
     }

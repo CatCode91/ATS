@@ -1,5 +1,6 @@
-﻿using ATS.Tariffs;
-using ATS.Terminals;
+﻿using ATSLibrary;
+using ATSLibrary.Tariffs;
+using ATSLibrary.Terminals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,20 +9,20 @@ using System.Threading.Tasks;
 
 namespace ATS
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
-            Station ats = Station.GetInstance("VELCOM");
+            //cоздаем объект станции
+            Station ats = new Station("VELCOM");
+            //выбираем тариф
+            Tariff tariff = new EasyTariff();
+            //Заключаем договор согласно выбранного тарифа
+            Dogovor dogovor = ats.CreateDogovor(tariff);
+            //получаем порт согласно договора
+            Port port = ats.GetPort(dogovor);
 
-            Dogovor dogovor = ats.CreateDogovor(new EasyTariff());
-            Dogovor dogovor1 = ats.CreateDogovor(new FullTariff());
-
-            Phone phone = ats.GetPhone(dogovor);
-            Phone phone2 = ats.GetPhone(dogovor);
-
-            phone.Connect();
-
+        
             Console.ReadKey();
         }
     }
