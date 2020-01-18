@@ -13,33 +13,38 @@ namespace ATS
     {
         static void Main(string[] args)
         {
+            Console.WriteLine();
+
+            //Создаем объект телефонной станции
             Station ats = new Station("VELCOM");
 
-            //Создаем перового абонента
-            Console.WriteLine();
+            //Создаем перового абонента, регистрируем ему порт согласно договора и выдаем терминал        
             Dogovor firstDogovor = ats.CreateDogovor(new EasyTariff());
             Port firstPort = ats.GetMyPort(firstDogovor);
-            Phone firstPhone = new Phone("Alcatel");
+            Terminal firstPhone = ats.GetPhone(PhoneModels.Alcatel);
             firstPhone.Ringing += Phone_Ringing;
             firstPhone.ConnectPort(firstPort);
-            Console.WriteLine($"Номер телефона абонента {firstPort.AbonentNumber}");
+            Console.WriteLine($"Номер телефона абонента: {firstPort.AbonentNumber} модель: {firstPhone.Name}");
             Console.WriteLine();
 
             //Создаем второго абонента
             Console.WriteLine();
             Dogovor secondDogovor = ats.CreateDogovor(new FullTariff());
             Port secondPort = ats.GetMyPort(secondDogovor);
-            Phone secondPhone = new Phone("Nokia");
+            Terminal secondPhone = ats.GetPhone(PhoneModels.Nokia);
             secondPhone.Ringing += Phone_Ringing;
             secondPhone.ConnectPort(secondPort);
-            Console.WriteLine($"Номер телефона абонента {secondPort.AbonentNumber}");
+            Console.WriteLine($"Номер телефона абонента: {secondPort.AbonentNumber} модель: {secondPhone.Name}");
             Console.WriteLine();
 
             //Совершаем звонок
             firstPhone.StartDial(29001);
             Console.ReadKey();
-        }
 
+            secondPhone.StartDial(29000);
+            //Console.ReadKey();
+
+        }
 
         private static void Phone_Ringing(ITerminal sender, TerminalEventArgs e)
         {
@@ -51,10 +56,10 @@ namespace ATS
            switch (command)
             {
                 case 1:
-                    sender.AcceptCall();
+                    sender.SendAcceptCall(true);
                     break;
                 case 2:
-                    sender.SendBusy();
+                    sender.SendAcceptCall(false);
                     break;
             }
         }

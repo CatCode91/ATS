@@ -8,7 +8,7 @@ namespace ATSLibrary.Terminals
 {
     public class Phone : Terminal
     {
-        public Phone(string name) : base(name)
+        public Phone(PhoneModels model) : base(model)
         {
         }
     }

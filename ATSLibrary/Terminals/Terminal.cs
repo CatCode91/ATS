@@ -6,25 +6,18 @@ using System.Threading.Tasks;
 
 namespace ATSLibrary.Terminals
 {
-    public abstract class Terminal: ITerminal
+    public class Terminal : ITerminal
     {
         private Port _port;
 
-        /// <summary>
-        /// Поднята ли трубка
-        /// </summary>
-        private bool _isTubeUp = false;
-
         public event TerminalStateHandler Ringing;
 
-        protected Terminal(string name)
+        internal Terminal(PhoneModels model)
         {
-            Name = name;
+            Name = model.ToString();
         }
 
         public string Name { get; }
-
-        public bool IsTubeUp => _isTubeUp;
 
         /// <summary>
         /// Подключить терминал к порту
@@ -34,7 +27,7 @@ namespace ATSLibrary.Terminals
         {
             if (_port != null)
             {
-                Console.WriteLine($"Ваше устройство уже подкючено к порту {_port.PortNumber}");
+                Console.WriteLine($"Ваше устройство уже подкючено!");
                 return;
             }
 
@@ -57,7 +50,7 @@ namespace ATSLibrary.Terminals
                 return;
             }
 
-            _port.DisconnectTerminal(this, ref _port);
+            _port.DisconnectTerminal(this);
         }
 
         /// <summary>
@@ -80,23 +73,15 @@ namespace ATSLibrary.Terminals
         /// </summary>
         public void FinishDial()
         {
-            _isTubeUp = false;
+            _port.FinishTalking();
         }
 
         /// <summary>
-        /// Ответить на входящий вызов
+        /// Подвердить прием входящего вызова
         /// </summary>
-        public void AcceptCall()
+        public void SendAcceptCall(bool accepted)
         {
-            _port.AcceptCall();
-        }
-
-        /// <summary>
-        /// Сбросить вызов
-        /// </summary>
-        public void SendBusy()
-        {
-            _port.BusySent();
+            _port.SendAccept(accepted);
         }
 
         /// <summary>
@@ -106,8 +91,7 @@ namespace ATSLibrary.Terminals
         /// <param name="e"></param>
         private void _port_RingNotify(Port sender, PortEventArgs e)
         {
-            Ringing?.Invoke(this, new TerminalEventArgs(e.Message));
+            Ringing?.Invoke(this, new TerminalEventArgs($"Входящий вызов от абонента {e.AbonentNumber}"));
         }
-
     }
 }

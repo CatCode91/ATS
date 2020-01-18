@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ATSLibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,9 +16,19 @@ namespace ATSLibrary.Terminals
             Message = message;
         }
 
+        public TerminalEventArgs(bool isCallAccepted)
+        {
+            IsCallAccepted = isCallAccepted;
+        }
+
         public string Message
         {
             get;
-        }      
+        }
+
+        public bool IsCallAccepted
+        {
+            get;
+        }
     }
 }

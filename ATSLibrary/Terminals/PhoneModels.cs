@@ -6,10 +6,14 @@ using System.Threading.Tasks;
 
 namespace ATSLibrary.Terminals
 {
-    public class MobilePhone : Terminal
+    public enum PhoneModels
     {
-        public MobilePhone(string name) : base(name)
-        {
-        }
+        Alcatel,
+        BlackBerry,
+        iPhone,
+        Motorola,
+        Nokia,
+        Samsung,
+        Xiaomi
     }
 }

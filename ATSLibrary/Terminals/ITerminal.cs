@@ -4,19 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ATSLibrary.Terminals
+namespace ATSLibrary
 {
     public interface ITerminal
     {
         /// <summary>
-        /// Находится ли трубка в снятом положении 
-        /// </summary>
-        bool IsTubeUp { get; }
-
-        /// <summary>
-        /// Наименование устройства
+        /// Имя устройства
         /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// Подключить к порту
+        /// </summary>
+        /// <param name="port"></param>
+        void ConnectPort(Port port);
+
+        /// <summary>
+        /// Отключиться от порта
+        /// </summary>
+        void DisconnectPort();
 
         /// <summary>
         /// Набрать номер
@@ -30,24 +36,8 @@ namespace ATSLibrary.Terminals
         void FinishDial();
 
         /// <summary>
-        /// Подключить к порту
+        /// Подтвердить или отклонить входящий вызов
         /// </summary>
-        /// <param name="port"></param>
-        void ConnectPort(Port port);
-
-        /// <summary>
-        /// Отключиться от порта
-        /// </summary>
-        void DisconnectPort();
-        
-        /// <summary>
-        /// Подтвердить ответ
-        /// </summary>
-        void AcceptCall();
-
-        /// <summary>
-        /// Занято
-        /// </summary>
-        void SendBusy();
+        void SendAcceptCall(bool accepted);
     }
 }

@@ -44,17 +44,17 @@
   <ItemGroup>
     <Compile Include="Call.cs" />
     <Compile Include="Dogovor.cs" />
-    <Compile Include="Port.cs" />
-    <Compile Include="PortEventArgs.cs" />
-    <Compile Include="PortStatus.cs" />
+    <Compile Include="Terminals\ITerminal.cs" />
+    <Compile Include="Terminals\Phone.cs" />
+    <Compile Include="Port\Port.cs" />
+    <Compile Include="Port\PortEventArgs.cs" />
+    <Compile Include="Port\PortStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Station.cs" />
     <Compile Include="Tariffs\EasyTariff.cs" />
     <Compile Include="Tariffs\FullTariff.cs" />
     <Compile Include="Tariffs\Tariff.cs" />
-    <Compile Include="Terminals\ITerminal.cs" />
-    <Compile Include="Terminals\MobilePhone.cs" />
-    <Compile Include="Terminals\Phone.cs" />
+    <Compile Include="Terminals\PhoneModels.cs" />
     <Compile Include="Terminals\Terminal.cs" />
     <Compile Include="Terminals\TerminalEventArgs.cs" />
   </ItemGroup>
