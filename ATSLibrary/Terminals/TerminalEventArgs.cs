@@ -8,16 +8,16 @@ namespace ATSLibrary.Terminals
 {
     public delegate void TerminalStateHandler(ITerminal sender, TerminalEventArgs e);
 
-    public class TerminalEventArgs
+    public class TerminalEventArgs : EventArgs
     {
         public TerminalEventArgs(string message)
         {
-            message = Message;
+            Message = message;
         }
 
         public string Message
         {
             get;
-        }
+        }      
     }
 }

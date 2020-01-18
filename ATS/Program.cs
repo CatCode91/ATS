@@ -13,28 +13,50 @@ namespace ATS
     {
         static void Main(string[] args)
         {
-            //cоздаем объект станции
             Station ats = new Station("VELCOM");
-            //выбираем тариф
-            Tariff tariff = new EasyTariff();
-            //Заключаем договор согласно выбранного тарифа
-            Dogovor dogovor = ats.CreateDogovor(tariff);
-            //получаем порт согласно договора
-            Port port = ats.GetPort(dogovor);
 
-            //создаем объект терминала (можно было бы получать из объекта ats (типа выдала стация), но не заморачивался)
-            Phone phone = new Phone("Alcatel");
-            //подписываемся на события звонка при входящем вызове
-            phone.Ringing += Phone_Ringing;
+            //Создаем перового абонента
+            Console.WriteLine();
+            Dogovor firstDogovor = ats.CreateDogovor(new EasyTariff());
+            Port firstPort = ats.GetMyPort(firstDogovor);
+            Phone firstPhone = new Phone("Alcatel");
+            firstPhone.Ringing += Phone_Ringing;
+            firstPhone.ConnectPort(firstPort);
+            Console.WriteLine($"Номер телефона абонента {firstPort.AbonentNumber}");
+            Console.WriteLine();
 
+            //Создаем второго абонента
+            Console.WriteLine();
+            Dogovor secondDogovor = ats.CreateDogovor(new FullTariff());
+            Port secondPort = ats.GetMyPort(secondDogovor);
+            Phone secondPhone = new Phone("Nokia");
+            secondPhone.Ringing += Phone_Ringing;
+            secondPhone.ConnectPort(secondPort);
+            Console.WriteLine($"Номер телефона абонента {secondPort.AbonentNumber}");
+            Console.WriteLine();
+
+            //Совершаем звонок
+            firstPhone.StartDial(29001);
             Console.ReadKey();
         }
 
+
         private static void Phone_Ringing(ITerminal sender, TerminalEventArgs e)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine($"{sender.Name}: {e.Message}");
             Console.WriteLine($"Ответить - 1, Сбросить - 2");
-            sender.AnswerCall();
+
+            var command = int.Parse(Console.ReadLine());
+
+           switch (command)
+            {
+                case 1:
+                    sender.AcceptCall();
+                    break;
+                case 2:
+                    sender.SendBusy();
+                    break;
+            }
         }
 
     }

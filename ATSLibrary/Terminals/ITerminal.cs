@@ -9,6 +9,16 @@ namespace ATSLibrary.Terminals
     public interface ITerminal
     {
         /// <summary>
+        /// Находится ли трубка в снятом положении 
+        /// </summary>
+        bool IsTubeUp { get; }
+
+        /// <summary>
+        /// Наименование устройства
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
         /// Набрать номер
         /// </summary>
         /// <param name="number"></param>
@@ -31,9 +41,9 @@ namespace ATSLibrary.Terminals
         void DisconnectPort();
         
         /// <summary>
-        /// Поднять трубку
+        /// Подтвердить ответ
         /// </summary>
-        void AnswerCall();
+        void AcceptCall();
 
         /// <summary>
         /// Занято

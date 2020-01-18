@@ -10,10 +10,10 @@ namespace ATSLibrary
     public class Station
     {
         //количество портов на станции
-        private Port[] ports = new Port[100];
+        private Port[] ports = new Port[10];
         //список заключенных договоров
         private List<Dogovor> dogovors = new List<Dogovor>();
-        //словарь номеров договоров к портам
+        //словарь соответствия номеров договоров к портам
         private Dictionary<Dogovor, Port> dogovorMap = new Dictionary<Dogovor, Port>();
 
         public Station(string name)
@@ -26,25 +26,36 @@ namespace ATSLibrary
 
         public string CompanyName { get; }
 
+        /// <summary>
+        /// Заключить новый договор
+        /// </summary>
+        /// <param name="tariff"></param>
+        /// <returns></returns>
         public Dogovor CreateDogovor(Tariff tariff)
         {
             int number = dogovors.Count() + 1;
 
             Dogovor dogovor = new Dogovor(number, tariff);
             Port port = ports.First(x => x.Status == PortStatus.Free);
-            port.SetAbonentNumber(Array.IndexOf(ports,port),29000);
+            int portNumber = Array.IndexOf(ports, port);
+            port.SetAbonentNumber(portNumber,29000 + portNumber);
             dogovorMap.Add(dogovor,port);
 
             return dogovor;
         }
 
-        public Port GetPort(Dogovor dogovor)
+        /// <summary>
+        /// Получить порт согласно договора для подключения пользовательских терминалов
+        /// </summary>
+        /// <param name="dogovor"></param>
+        /// <returns></returns>
+        public Port GetMyPort(Dogovor dogovor)
         {
             Port port = dogovorMap[dogovor];
 
             if (dogovor.IsPortSet)
             {
-                throw new Exception(message:$"{port.PortNumber}: Порт уже используется!");
+                throw new Exception(message:$"{port.PortNumber}: Порт зарегистрирован и уже используется!");
             }
 
             dogovor.IsPortSet = true;
@@ -57,15 +68,19 @@ namespace ATSLibrary
 
             for (int i = 0; i <ports.Length; i++)
             {
+                Console.Write("#");
                 ports[i] = new Port();
                 ports[i].PortConnected += Station_PortConnected;
                 ports[i].PortDisconnected += Station_PortDisconnected;
-                ports[i].CallNotify += Station_CallNotify;
             }
+            Console.WriteLine();
+            Console.WriteLine("Инициализация завершена");
         }
 
         private void Station_PortConnected(Port sender, PortEventArgs e)
         {
+            sender.OutcomeCall += Sender_OutcomeCall;
+            sender.CallAccepted += Sender_CallAccepted;
             Console.WriteLine(e.Message);
             sender.PortStatusChange(PortStatus.Connected);
         }
@@ -76,9 +91,15 @@ namespace ATSLibrary
             sender.PortStatusChange(PortStatus.Disconnected);
         }
 
-        private void Station_CallNotify(Port sender, PortEventArgs e)
+        private void Sender_CallAccepted(Port sender, PortEventArgs e)
         {
-            var callingPort = ports.First(x => x.AbonentNumber == e.DialNumber);
+            Console.WriteLine($"Вызов подтвержден {e.DialNumber} {sender.AbonentNumber}");
+        }
+
+        private void Sender_OutcomeCall(Port sender, PortEventArgs e)
+        {
+            //ищем порт соответствующий вызываемому номеру
+            Port callingPort = ports.FirstOrDefault(x => x.AbonentNumber == e.Number);
 
             if (callingPort == null)
             {
@@ -101,6 +122,9 @@ namespace ATSLibrary
             Console.WriteLine("Вызов абонента...");
             callingPort.IncomeCalling(sender.AbonentNumber);
         }
-   
+
+  
+      
+ 
     }
 }

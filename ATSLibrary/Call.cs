@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ATSLibrary.Tariffs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,23 +7,22 @@ using System.Threading.Tasks;
 
 namespace ATSLibrary
 {
-    public struct Call
+    internal class Call
     {
         DateTime Date;
         TimeSpan Duration;
-        CallType Type;
+        Tariff Tariff;
+        int IncomingNumber;
+        int OutComingNumber;
 
-        public Call(DateTime date, TimeSpan duration, CallType type)
+        public Call(DateTime date, TimeSpan duration, Tariff tariff,int incomingNumber, int outComingNumber)
         {
             Date = date;
             Duration = duration;
-            Type = type;
-        }
-
-        public enum CallType
-        {
-            Incoming,
-            Outcoming
-        }
+            Tariff = tariff;
+            IncomingNumber = incomingNumber;
+            OutComingNumber = outComingNumber;
+        } 
     }
+
 }

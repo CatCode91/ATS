@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace ATSLibrary
 {
     internal delegate void PortStateHandler(Port sender, PortEventArgs e);
-    
+
     internal class PortEventArgs : EventArgs
     {
         public PortEventArgs(string message)
@@ -15,21 +15,16 @@ namespace ATSLibrary
             Message = message;
         }
 
-        public PortEventArgs(PortStatus status)
+        public PortEventArgs(Port outPort, Port inPort, int number)
         {
-           Status = status;
-        }
-
-        public PortEventArgs(int dialNumber, PortStatus status)
-        {
-            dialNumber = DialNumber;
-            Status = status;
+            OutPort = outPort;
+            InPort = inPort;
+            Number = number;
         }
 
         public string Message { get; private set; }
-        public int DialNumber { get; private set; }
-        public PortStatus Status { get; private set; }
-
-
+        public int Number { get; private set; }
+        public Port OutPort { get; private set; }
+        public Port InPort { get; private set; }
     }
 }

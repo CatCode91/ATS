@@ -53,6 +53,7 @@
     <Compile Include="Tariffs\FullTariff.cs" />
     <Compile Include="Tariffs\Tariff.cs" />
     <Compile Include="Terminals\ITerminal.cs" />
+    <Compile Include="Terminals\MobilePhone.cs" />
     <Compile Include="Terminals\Phone.cs" />
     <Compile Include="Terminals\Terminal.cs" />
     <Compile Include="Terminals\TerminalEventArgs.cs" />

@@ -11,9 +11,8 @@ namespace ATSLibrary
     {
         private DateTime _dateOfCreation;
         private Tariff _tariff;
-        private int abonentNumber;
 
-        public Dogovor(int dogovorNumber, Tariff tariff)
+        internal Dogovor(int dogovorNumber, Tariff tariff)
         {
             DogovorNumber = dogovorNumber;
             _tariff = tariff;
@@ -21,7 +20,6 @@ namespace ATSLibrary
         }
 
         public int DogovorNumber { get; }
-        public int AbonentNumber => abonentNumber;
         public DateTime DateOfCreation => _dateOfCreation;
         public Tariff Tariff => _tariff;
         internal bool IsPortSet { get; set; }
@@ -40,11 +38,6 @@ namespace ATSLibrary
                 Console.WriteLine("К сожалению, тариф можно изменить только раз в месяц");
             }
 
-        }
-
-        internal void SetNumber(int number)
-        {
-            abonentNumber = number;
         }
     }
 }
