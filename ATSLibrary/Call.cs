@@ -9,20 +9,21 @@ namespace ATSLibrary
 {
     internal class Call
     {
-        DateTime Date;
-        TimeSpan Duration;
-        Tariff Tariff;
-        int IncomingNumber;
-        int OutComingNumber;
-
-        public Call(DateTime date, TimeSpan duration, Tariff tariff,int incomingNumber, int outComingNumber)
+        public Call(DateTime startDate,DateTime finishDate, Tariff tariff, int fromAbonentNumber, int toAbonentNumber)
         {
-            Date = date;
-            Duration = duration;
+            StartDate = startDate;
+            FinishDate = finishDate;
+            Duration = finishDate - startDate;
             Tariff = tariff;
-            IncomingNumber = incomingNumber;
-            OutComingNumber = outComingNumber;
-        } 
-    }
+            AbonentFrom = fromAbonentNumber;
+            AbonentTo = toAbonentNumber;
+        }
 
+        public DateTime StartDate { get; private set; }
+        public DateTime FinishDate { get; private set; }
+        public TimeSpan Duration { get; private set; }
+        public Tariff Tariff { get; private set; }
+        public int AbonentFrom { get; private set; }
+        public int AbonentTo { get; private set; }
+    }
 }

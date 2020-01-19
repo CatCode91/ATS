@@ -42,8 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Billing.cs" />
     <Compile Include="Call.cs" />
     <Compile Include="Dogovor.cs" />
+    <Compile Include="Tariffs\Medium.cs" />
     <Compile Include="Terminals\ITerminal.cs" />
     <Compile Include="Terminals\Phone.cs" />
     <Compile Include="Port\Port.cs" />
@@ -54,7 +56,6 @@
     <Compile Include="Tariffs\EasyTariff.cs" />
     <Compile Include="Tariffs\FullTariff.cs" />
     <Compile Include="Tariffs\Tariff.cs" />
-    <Compile Include="Terminals\PhoneModels.cs" />
     <Compile Include="Terminals\Terminal.cs" />
     <Compile Include="Terminals\TerminalEventArgs.cs" />
   </ItemGroup>

@@ -6,15 +6,19 @@ namespace ATSLibrary
 {
     public class Port
     {
-        public   event PortStateHandler RingNotify;
+        public event PortStateHandler RingNotify;
         internal event PortStateHandler PortConnected;
         internal event PortStateHandler PortDisconnected;
         internal event PortStateHandler OutcomeCall;
         internal event PortStateHandler CallFinish;
 
+        internal delegate bool СallAcceptHandle(bool accept);
+        internal event СallAcceptHandle CallAccepted;
+
         internal Port()
         {
             Status = PortStatus.Free;
+            CancelTokenSource = new CancellationTokenSource();
         }
 
         public int AbonentNumber { get; private set; }
@@ -24,8 +28,7 @@ namespace ATSLibrary
         internal bool StopCall { get; private set; } = false;
         internal int PortNumber { get; private set; }
         internal int DogovorNumber { get; private set; }
-
-
+        internal CancellationTokenSource CancelTokenSource { get; }
 
         /// <summary>
         /// Подключить терминал к порту
@@ -77,7 +80,7 @@ namespace ATSLibrary
         /// </summary>
         internal void SendAccept(bool accepted)
         {
-            IsCallAccepted = accepted;
+            CallAccepted?.Invoke(accepted);
         }
 
         /// <summary>
@@ -85,6 +88,7 @@ namespace ATSLibrary
         /// </summary>
         internal void FinishTalking()
         {
+            CancelTokenSource.Cancel();
             CallFinish?.Invoke(this, new PortEventArgs(null));
         }
 
@@ -108,5 +112,7 @@ namespace ATSLibrary
             PortNumber = portNumber;
             AbonentNumber = abonentNumber;
         }
+
+
     }
 }

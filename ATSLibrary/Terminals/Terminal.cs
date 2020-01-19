@@ -12,7 +12,7 @@ namespace ATSLibrary.Terminals
 
         public event TerminalStateHandler Ringing;
 
-        internal Terminal(PhoneModels model)
+        internal Terminal(string model)
         {
             Name = model.ToString();
         }

@@ -11,39 +11,37 @@ namespace ATS
 {
     public class Program
     {
+        private Random random = new Random();
+        
         static void Main(string[] args)
         {
-            Console.WriteLine();
-
             //Создаем объект телефонной станции
             Station ats = new Station("VELCOM");
+            CreateDogovors(ats,10);
 
-            //Создаем перового абонента, регистрируем ему порт согласно договора и выдаем терминал        
-            Dogovor firstDogovor = ats.CreateDogovor(new EasyTariff());
-            Port firstPort = ats.GetMyPort(firstDogovor);
-            Terminal firstPhone = ats.GetPhone(PhoneModels.Alcatel);
-            firstPhone.Ringing += Phone_Ringing;
-            firstPhone.ConnectPort(firstPort);
-            Console.WriteLine($"Номер телефона абонента: {firstPort.AbonentNumber} модель: {firstPhone.Name}");
-            Console.WriteLine();
+            Console.ReadLine();
+        }
 
-            //Создаем второго абонента
-            Console.WriteLine();
-            Dogovor secondDogovor = ats.CreateDogovor(new FullTariff());
-            Port secondPort = ats.GetMyPort(secondDogovor);
-            Terminal secondPhone = ats.GetPhone(PhoneModels.Nokia);
-            secondPhone.Ringing += Phone_Ringing;
-            secondPhone.ConnectPort(secondPort);
-            Console.WriteLine($"Номер телефона абонента: {secondPort.AbonentNumber} модель: {secondPhone.Name}");
-            Console.WriteLine();
+        /// <summary>
+        /// Создает указанное количество абонентов
+        /// </summary>
+        /// <param name="ats"></param>
+        /// <param name="count"></param>
+        private static Abonent[] CreateDogovors(Station ats,int count)
+        {
+            Abonent[] abonents = new Abonent[count];
 
-            //Совершаем звонок
-            firstPhone.StartDial(29001);
-            Console.ReadKey();
+            for (int i = 0; i < count; i++)
+            {
+                Dogovor Dogovor = ats.CreateDogovor(new EasyTariff());
+                Port Port = ats.GetMyPort(Dogovor);
+                Terminal Phone = ats.GetPhone();
+                Phone.Ringing += Phone_Ringing;
+                abonents[i] = new Abonent(Dogovor, Port, Phone);
+                Console.WriteLine($"Создан абонент с номером: {Port.AbonentNumber}, тариф: {Dogovor.Tariff.Name}, модель телефона: {Phone.Name}");
+            }
 
-            secondPhone.StartDial(29000);
-            //Console.ReadKey();
-
+            return abonents;
         }
 
         private static void Phone_Ringing(ITerminal sender, TerminalEventArgs e)
@@ -63,6 +61,5 @@ namespace ATS
                     break;
             }
         }
-
     }
 }

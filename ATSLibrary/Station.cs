@@ -11,19 +11,19 @@ namespace ATSLibrary
 {
     public class Station
     {
-        private List<Call> journal = new List<Call>();
+        private Random random = new Random();
+        private string[] phoneModels = { "Alcatel", "BlackBerry", "iPhone", "Motorola", "Nokia", "Samsung", "Xiaomi" };
 
+        private bool _acceptedCall;
+
+        private Billing billing = new Billing();
         //количество портов на станции
-        private Port[] ports = new Port[10];
+        private Port[] ports = new Port[30];
         //список заключенных договоров
         private List<Dogovor> dogovors = new List<Dogovor>();
 
         //словарь соответствия номеров договоров к портам
         private Dictionary<Dogovor, Port> dogovorMap = new Dictionary<Dogovor, Port>();
-
-        private static CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
-        private CancellationToken token = cancelTokenSource.Token;
-
 
         public Station(string name)
         {
@@ -45,19 +45,30 @@ namespace ATSLibrary
         {
             int number = dogovors.Count() + 1;
 
-            Dogovor dogovor = new Dogovor(number, tariff);
+            //заключаем договор согласно выбранного тарифа, но пока подкинем тариф рандомно
+            Dogovor dogovor = new Dogovor(number, RandomTariff());
+
+            //ищем свободный порт и занимаем его
             Port port = ports.First(x => x.Status == PortStatus.Free);
+            port.PortStatusChange(PortStatus.Disconnected);
+
             int portNumber = Array.IndexOf(ports, port);
-            port.SetAbonentNumber(number,portNumber, 29000 + portNumber);
-            dogovorMap.Add(dogovor, port);
+
+            port.SetAbonentNumber(number, portNumber, 29000 + portNumber);
+
             dogovors.Add(dogovor);
+
+            dogovorMap.Add(dogovor, port);
+           
 
             return dogovor;
         }
 
-        public Phone GetPhone(PhoneModels model)
+        public Phone GetPhone()
         {
-            return new Phone(model);
+            int index = random.Next(0, phoneModels.Length);
+
+            return new Phone(phoneModels[index]);
         }
 
         /// <summary>
@@ -88,8 +99,11 @@ namespace ATSLibrary
                 ports[i] = new Port();
                 ports[i].PortConnected += Station_PortConnected;
                 ports[i].PortDisconnected += Station_PortDisconnected;
+                //для красоты :) типа грузятся порты)
+                Thread.Sleep(50);
             }
             Console.WriteLine();
+         
             Console.WriteLine("Инициализация завершена");
             Console.WriteLine();
         }
@@ -97,15 +111,15 @@ namespace ATSLibrary
         private void Station_PortConnected(Port sender, PortEventArgs e)
         {
             sender.OutcomeCall += Sender_OutcomeCall;
-            sender.CallFinish += Sender_CallFinish;
+            sender.CallAccepted += Sender_CallAccepted;
             Console.WriteLine(e.Message);
             sender.PortStatusChange(PortStatus.Connected);
         }
 
-        private void Sender_CallFinish(Port sender, PortEventArgs e)
+        private bool Sender_CallAccepted(bool accept)
         {
-            Console.WriteLine($"{sender.AbonentNumber} инициировал завершение разговора");
-            cancelTokenSource.Cancel();
+            _acceptedCall = accept;
+            return accept;
         }
 
         private void Station_PortDisconnected(Port sender, PortEventArgs e)
@@ -139,49 +153,75 @@ namespace ATSLibrary
             }
 
             Console.WriteLine("Вызов абонента...");
+
             //Вызываем метод вызова на найденом порту
             calledPort.IncomeCalling(sender);
 
             //проверяем, ответил ли абонент
-            if (calledPort.IsCallAccepted)
+            if (_acceptedCall)
             {
-                Console.WriteLine($"Вызов принят абонентом {calledPort.AbonentNumber} ");
-                DateTime timeStart = DateTime.Now;
-                Talk(sender, calledPort);
-                DateTime timeFinish = DateTime.Now;
-                TimeSpan duration = timeFinish - timeStart;
-                Tariff currentTariff = dogovors.Find(x => x.DogovorNumber == sender.DogovorNumber).Tariff;
-                journal.Add(new Call(timeStart,duration,currentTariff,sender.AbonentNumber,calledPort.AbonentNumber));
+                Console.WriteLine($"Вызов принят абонентом {sender.AbonentNumber} ");
+                Connection(sender, calledPort);
             }
 
             else
             {
-                Console.WriteLine($"Вызов отклонен абонентом {calledPort.AbonentNumber}");
+                Console.WriteLine($"Вызов отклонен абонентом {sender.AbonentNumber}");
+            }
+
+        }
+
+        private async void Connection(Port callingPort, Port answerPort)
+        {
+            Console.WriteLine("Начат разговор");
+            DateTime timeStart = DateTime.Now;
+            await Task.Run(() => Talking(callingPort, answerPort));
+            FinishDialog(callingPort, answerPort, timeStart);
+        }
+
+        private void FinishDialog(Port callingPort, Port answerPort, DateTime timeStart)
+        {
+            DateTime timeFinish = DateTime.Now; 
+            Tariff tariff = dogovors.FirstOrDefault(x => x.DogovorNumber == callingPort.DogovorNumber).Tariff;
+            billing.AddCall(new Call(timeStart,timeFinish,tariff, callingPort.AbonentNumber, answerPort.AbonentNumber));
+            Console.WriteLine("Запись о звонке добавлена в журнал");
+        }
+
+        private void Talking(Port call, Port answer)
+        {
+            //переменная для импровизированного счетчика чисто для вывода на консоль
+            int i = 0;
+
+            while (true)
+            {             
+                if (call.CancelTokenSource.Token.IsCancellationRequested)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine($"Вызов завершен абонентом {call.AbonentNumber}");
+                    return;
+                }
+
+                if (answer.CancelTokenSource.Token.IsCancellationRequested)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine($"Вызов завершен абонентом {answer.AbonentNumber}");
+                    return;
+                }
+
+                TimeSpan time = new TimeSpan(0, 0, i);
+                Console.Write(time);
+                Thread.Sleep(1000);
+                i++;
+                Console.CursorLeft = 0;
             }
         }
 
-        private void Talk(Port call, Port answer)
+        private Tariff RandomTariff()
         {
-            //тут происходит соединение двух портов
-            Console.WriteLine("Начат разговор");
-            Console.WriteLine("Нажмите любую клавишу для отмены...");
-
-            if (token.IsCancellationRequested)
-            {
-                return;
-            }
-
-            Task task1 = new Task(() =>
-            {
-                while (true)
-                {
-                    Thread.Sleep(1000);
-                    Console.Write("#");
-                }
-            });
-
-            Console.WriteLine();
-            task1.Start();
+            Type baseType = typeof(Tariff);
+            var allDerivedTypes = baseType.Assembly.ExportedTypes.Where(t => baseType.IsAssignableFrom(t)).Where(t => t.IsAbstract == false).ToArray();
+            Tariff tariff = Activator.CreateInstance(Type.GetType(allDerivedTypes[random.Next(0, allDerivedTypes.Length)].FullName)) as Tariff;
+            return tariff;
         }
 
     }
