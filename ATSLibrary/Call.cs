@@ -9,12 +9,11 @@ namespace ATSLibrary
 {
     internal class Call
     {
-        public Call(DateTime startDate,DateTime finishDate, Tariff tariff, int fromAbonentNumber, int toAbonentNumber)
+        public Call(Tariff tariff, DateTime startDate,DateTime finishDate, int fromAbonentNumber, int toAbonentNumber, double amount)
         {
             StartDate = startDate;
             FinishDate = finishDate;
             Duration = finishDate - startDate;
-            Tariff = tariff;
             AbonentFrom = fromAbonentNumber;
             AbonentTo = toAbonentNumber;
         }
@@ -25,5 +24,6 @@ namespace ATSLibrary
         public Tariff Tariff { get; private set; }
         public int AbonentFrom { get; private set; }
         public int AbonentTo { get; private set; }
+        public int Amount { get; private set; }
     }
 }

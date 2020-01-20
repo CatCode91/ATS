@@ -57,7 +57,7 @@ namespace ATSLibrary.Terminals
         /// Позвонить по номеру
         /// </summary>
         /// <param name="number"></param>
-        public void StartDial(int number)
+        public void Dial(int number)
         {
             if (_port == null)
             {
@@ -89,9 +89,9 @@ namespace ATSLibrary.Terminals
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void _port_RingNotify(Port sender, PortEventArgs e)
+        private void _port_RingNotify(Port sender, int number)
         {
-            Ringing?.Invoke(this, new TerminalEventArgs($"Входящий вызов от абонента {e.AbonentNumber}"));
+            Ringing?.Invoke(this, new TerminalEventArgs($"Входящий вызов от абонента {number}"));
         }
     }
 }

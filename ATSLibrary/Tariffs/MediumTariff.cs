@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ATSLibrary.Tariffs
 {
-    public class Medium : Tariff
+    public class MediumTariff : Tariff
     {
         public override string Name => @"""Народный""";
         public override double Rate => 1;

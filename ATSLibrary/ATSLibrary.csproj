@@ -45,7 +45,7 @@
     <Compile Include="Billing.cs" />
     <Compile Include="Call.cs" />
     <Compile Include="Dogovor.cs" />
-    <Compile Include="Tariffs\Medium.cs" />
+    <Compile Include="Tariffs\MediumTariff.cs" />
     <Compile Include="Terminals\ITerminal.cs" />
     <Compile Include="Terminals\Phone.cs" />
     <Compile Include="Port\Port.cs" />

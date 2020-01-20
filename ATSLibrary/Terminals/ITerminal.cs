@@ -28,7 +28,7 @@ namespace ATSLibrary
         /// Набрать номер
         /// </summary>
         /// <param name="number"></param>
-        void StartDial(int number);
+        void Dial(int number);
 
         /// <summary>
         /// Завершить звонок

@@ -6,29 +6,27 @@ namespace ATSLibrary
 {
     public class Port
     {
-        public event PortStateHandler RingNotify;
+        public delegate void RingAcceptHandle(Port sender, int abonentNumber);
+        public event RingAcceptHandle RingNotify;
+
         internal event PortStateHandler PortConnected;
         internal event PortStateHandler PortDisconnected;
         internal event PortStateHandler OutcomeCall;
-        internal event PortStateHandler CallFinish;
 
-        internal delegate bool СallAcceptHandle(bool accept);
+        internal delegate void СallAcceptHandle(Port sender,bool accept);
         internal event СallAcceptHandle CallAccepted;
 
         internal Port()
         {
             Status = PortStatus.Free;
-            CancelTokenSource = new CancellationTokenSource();
         }
 
         public int AbonentNumber { get; private set; }
         public PortStatus Status { get; private set; }
 
-        internal bool IsCallAccepted { get; private set; }
-        internal bool StopCall { get; private set; } = false;
         internal int PortNumber { get; private set; }
         internal int DogovorNumber { get; private set; }
-        internal CancellationTokenSource CancelTokenSource { get; }
+        internal CancellationTokenSource CancelTokenSource { get; set; }
 
         /// <summary>
         /// Подключить терминал к порту
@@ -56,7 +54,7 @@ namespace ATSLibrary
         internal void IncomeCalling(Port port)
         {
             //оповестить о входящем вызове подписанный терминал
-            RingNotify?.Invoke(this, new PortEventArgs(port.AbonentNumber));
+            RingNotify?.Invoke(this, port.AbonentNumber);
         }
 
         /// <summary>
@@ -80,7 +78,7 @@ namespace ATSLibrary
         /// </summary>
         internal void SendAccept(bool accepted)
         {
-            CallAccepted?.Invoke(accepted);
+            CallAccepted?.Invoke(this,accepted);
         }
 
         /// <summary>
@@ -89,7 +87,6 @@ namespace ATSLibrary
         internal void FinishTalking()
         {
             CancelTokenSource.Cancel();
-            CallFinish?.Invoke(this, new PortEventArgs(null));
         }
 
         /// <summary>
