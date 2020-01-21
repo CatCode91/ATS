@@ -9,24 +9,49 @@ namespace ATSLibrary
 {
     public class Dogovor
     {
-        private DateTime _dateOfCreation;
-        private DateTime _dateOfLastPay;
-        private Tariff _tariff;
-        private double _balance = 0.00;
+        private double _debt;
 
         internal Dogovor(int dogovorNumber, Tariff tariff)
         {
+            Balance = 0.00;
             DogovorNumber = dogovorNumber;
-            _tariff = tariff;
-            _dateOfCreation = DateTime.Today;
-            _dateOfLastPay = DateTime.Now;
+            Tariff = tariff;
+            DateOfCreation = DateTime.Today;
         }
 
-        public int DogovorNumber { get; } 
-        public DateTime DateOfCreation => _dateOfCreation;
-        internal DateTime DateOfLastPay => _dateOfLastPay;
-        public Tariff Tariff => _tariff; 
-        internal double Balance => _balance;
+        public int DogovorNumber
+        {
+            get;
+        } 
+        public DateTime DateOfCreation
+        {
+            get;
+            private set;
+        }
+        public Tariff Tariff { get; private set; }
+        internal double Balance
+        {
+            get;
+            private set;
+        }
+
+        internal double Debt
+        {
+            get
+            {
+                return _debt;
+            }
+
+            set
+            {
+                _debt = value;
+
+                if (_debt < 0 )
+                {
+                    Balance += Math.Abs(_debt);
+                }
+            }
+        }
 
         public void ChangeTariff(Tariff tariff)
         {
@@ -34,13 +59,13 @@ namespace ATSLibrary
 
             if (today.AddMonths(-1) >= DateOfCreation)
             {
-                if (_tariff == tariff)
+                if (Tariff == tariff)
                 {
                     Console.WriteLine($"У вас уже установлен тариф - {tariff.Name}");
                     return;
                 }
 
-                _tariff = tariff;
+                Tariff = tariff;
                 Console.WriteLine($"Поздравляем! Ваш тариф изменен на - {tariff.Name}");
             }
 
@@ -50,19 +75,10 @@ namespace ATSLibrary
             }
 
         }
-        internal void TakeFromBalance(double sum)
-        {
-            _balance -= sum;
-        }
+
         internal void PayBills(double sum)
         {
-            _balance += sum;
-
-            if (_balance >= 0)
-            {
-                _dateOfLastPay = DateTime.Now;
-            }
-
+            Debt -= sum;
             Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance} BYN");
         }
     }

@@ -3,6 +3,7 @@ using ATSLibrary.Tariffs;
 using ATSLibrary.Terminals;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace ATS
 {
@@ -127,6 +128,12 @@ namespace ATS
 
             List<Call> history = ats.GetHistory(currentAbonent.Port.AbonentNumber);
 
+            if (history == null)
+            {
+                Console.WriteLine($"{currentAbonent.Port.AbonentNumber} - нет истории вызовов");
+                return;
+            }
+
             Console.WriteLine("    Дата вызова   \t --\t \t Длительность  \t Стоимость");
 
             foreach (var s in history)
@@ -134,30 +141,31 @@ namespace ATS
                 Console.WriteLine($"{s.StartDate} \t {s.AbonentFrom}=>{s.AbonentTo} \t {s.Duration.ToString(@"hh\:mm\:ss")} \t {s.Amount} BYN");
             }
 
-           Console.WriteLine("Фильтровать по:");
-           Console.WriteLine("1. Дате \t 2. Сумме  \t 3. Номеру");
-
             bool isAlive = true;
 
             while (isAlive)
             {
+                Console.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine("Фильтровать по:");
+                Console.WriteLine($"1. Дате \t 3. Номеру \t 5.Выход");
+                Console.WriteLine($"2. Сумме \t 4. Сброс фильтра");
+
                 int command = Convert.ToInt32(Console.ReadLine());
 
                 switch (command)
                 {
                     case 1:
-                        ApplyFilter(Filter.FilterByDate);
+                        ApplyFilter(history,Filter.FilterByDate);
                         break;
-
                     case 2:
-                        ApplyFilter(Filter.FilterByAmount);
+                        ApplyFilter(history, Filter.FilterByAmount);
                         break;
-
                     case 3:
-                        ApplyFilter(Filter.FilterByDate);
+                        ApplyFilter(history, Filter.FilterByAbonent);
                         break;
                     case 4:
-                        ApplyFilter(Filter.FilterReset);
+                        ApplyFilter(history, Filter.FilterReset);
                         break;
                     case 5:
                         isAlive = false;
@@ -166,18 +174,46 @@ namespace ATS
             }
         }
 
-        private static void ApplyFilter(Filter filterByDate)
+        private static void ApplyFilter(List<Call> history, Filter filter)
         {
-           
+            List<Call> result = new List<Call>();
+            switch (filter)
+            {
+                case Filter.FilterByDate:
+                    Console.WriteLine("Введите дату(дд.мм.гг):");
+                    DateTime date = DateTime.ParseExact(Console.ReadLine().ToString(), "dd.MM.yy", CultureInfo.InvariantCulture);
+                    result = history.FindAll(x => x.StartDate.Date == date.Date);
+                    break;
 
+                case Filter.FilterByAmount:
+                    Console.WriteLine("Введите сумму:");
+                    double amount = Convert.ToDouble(Console.ReadLine());
+                    result = history.FindAll(x => x.Amount == amount);
+                    break;
 
+                case Filter.FilterByAbonent:
+                    Console.WriteLine("Введите номер абонента:");
+                    double number = Convert.ToDouble(Console.ReadLine());
+                    result = history.FindAll(x => x.AbonentFrom == number || x.AbonentTo == number);
+                    break;
 
+                case Filter.FilterReset:
+                    result = history;
+                    break;
+            }
+
+            foreach (var s in result)
+            {
+                Console.WriteLine($"{s.StartDate} \t {s.AbonentFrom}=>{s.AbonentTo} \t {s.Duration.ToString(@"hh\:mm\:ss")} \t {s.Amount} BYN");
+            }
+
+            result = null;
         }
 
         /// <summary>
-        /// Узнать баланс
-        /// </summary>
-        /// <param name="abonents"></param>
+            /// Узнать баланс
+            /// </summary>
+            /// <param name="abonents"></param>
         private static void GetBalance(Abonent[] abonents)
         {
             Console.WriteLine("Позвоните по номеру 100 :)");

@@ -12,51 +12,42 @@ namespace ATSLibrary
 
         private List<Call> journal = new List<Call>();
 
-        public Billing()
-        {
-             LastDayPays = new DateTime(DateTime.Now.Year, DateTime.Now.Month, _dayPayBills);
-        }
-
-        internal DateTime LastDayPays { get; private set; }
-
-        internal void AddCall(Call call)
+        internal void AddCallToJournal(Call call)
         {
             journal.Add(call);
             Console.WriteLine("Запись о звонке добавлена в журнал");
         }
 
-        internal void TakeCallPrice(Dogovor dogovor, double amount)
-        {
-            dogovor.TakeFromBalance(amount);
-        }
-
         internal List<Call> GetHistory(int number)
         {
-            List<Call> calls = journal.Where((x => (x.AbonentFrom == number) & (x.AbonentTo == number))).ToList();
+            List<Call> calls = journal.Where((x => x.AbonentFrom == number || x.AbonentTo == number)).ToList();
 
             return calls;
         }
 
         internal bool IsBillsPaid(Dogovor dogovor)
         {
-            //если есть деньги на счету, звонить можно
-            if (dogovor.Balance > 0)
+            return (dogovor.Debt > 0) ? false : true;
+        }
+
+        //подбить счет по абоненту
+        internal double CountBill(Dogovor dogovor, Port port, DateTime date)
+        {
+            DateTime firstDate = new DateTime(date.Year, date.Month -1 , 1);
+
+            DateTime lastDate = new DateTime(date.Year, date.Month + 1, 1).AddDays(-1);
+
+            var dateFilter = journal.Where(x => (x.StartDate >= firstDate) & (x.StartDate <= lastDate));
+            var abonentFilter = dateFilter.Where(x => (x.AbonentFrom == port.AbonentNumber) & (x.Dogovor.DogovorNumber == dogovor.DogovorNumber));
+
+            double amount = 0;
+
+            foreach (var i in abonentFilter)
             {
-                return true;
+                amount += i.Amount;
             }
 
-            //если долги погашены до контрольного дня, разрешаем звонить
-            if ((dogovor.DateOfLastPay >= LastDayPays.AddMonths(-1)))
-            {
-                return true;
-            }
-
-            else
-            {
-                Console.WriteLine($"Оплатите предыдущий счет! Оплата до {LastDayPays}");
-                Console.WriteLine($"Последний платеж совершен {dogovor.DateOfLastPay}");
-                return false;
-            }
+            return amount;
         }
     }
 }

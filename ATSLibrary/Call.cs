@@ -9,8 +9,9 @@ namespace ATSLibrary
 {
     public class Call
     {
-        public Call(Tariff tariff, DateTime startDate,DateTime finishDate, int fromAbonentNumber, int toAbonentNumber, double amount)
+        public Call(Dogovor dogovor, Tariff tariff, DateTime startDate,DateTime finishDate, int fromAbonentNumber, int toAbonentNumber, double amount)
         {
+            Dogovor = dogovor;
             StartDate = startDate;
             FinishDate = finishDate;
             Duration = finishDate - startDate;
@@ -20,6 +21,7 @@ namespace ATSLibrary
             Amount = amount;
         }
 
+        public Dogovor Dogovor { get; private set; }
         public DateTime StartDate { get; private set; }
         public DateTime FinishDate { get; private set; }
         public TimeSpan Duration { get; private set; }
