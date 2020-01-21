@@ -109,7 +109,5 @@ namespace ATSLibrary
             PortNumber = portNumber;
             AbonentNumber = abonentNumber;
         }
-
-
     }
 }

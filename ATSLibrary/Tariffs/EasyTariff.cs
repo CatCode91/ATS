@@ -9,6 +9,6 @@ namespace ATSLibrary.Tariffs
     public class EasyTariff : Tariff
     {
         public override string Name => @"""Легкий""";
-        public override double Rate => 0.3;
+        public override double Rate => 0.01;
     }
 }

@@ -10,6 +10,7 @@ namespace ATSLibrary
     public class Dogovor
     {
         private DateTime _dateOfCreation;
+        private DateTime _dateOfLastPay;
         private Tariff _tariff;
         private double _balance = 0.00;
 
@@ -18,13 +19,14 @@ namespace ATSLibrary
             DogovorNumber = dogovorNumber;
             _tariff = tariff;
             _dateOfCreation = DateTime.Today;
+            _dateOfLastPay = DateTime.Now;
         }
 
-        public int DogovorNumber { get; }
+        public int DogovorNumber { get; } 
         public DateTime DateOfCreation => _dateOfCreation;
+        internal DateTime DateOfLastPay => _dateOfLastPay;
         public Tariff Tariff => _tariff; 
         internal double Balance => _balance;
-        internal bool IsPortSet { get; set; }
 
         public void ChangeTariff(Tariff tariff)
         {
@@ -51,6 +53,17 @@ namespace ATSLibrary
         internal void TakeFromBalance(double sum)
         {
             _balance -= sum;
+        }
+        internal void PayBills(double sum)
+        {
+            _balance += sum;
+
+            if (_balance >= 0)
+            {
+                _dateOfLastPay = DateTime.Now;
+            }
+
+            Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance} BYN");
         }
     }
 }

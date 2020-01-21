@@ -14,7 +14,7 @@ namespace ATSLibrary
         private Random _random = new Random();
         //список выдаваемых станцией моделей телефонов
         private string[] _phoneModels = { "Alcatel", "BlackBerry", "iPhone", "Motorola", "Nokia", "Samsung", "Xiaomi" };
-        //поле, подтвердил ли вызов вызываемый абонент
+        //поле,указывающее подтвердил ли вызов вызываемый абонент
         private (bool,Port) _acceptedCall;
         //объект биллинговой системы
         private Billing _billing = new Billing();
@@ -24,12 +24,16 @@ namespace ATSLibrary
         private List<Dogovor> _dogovors = new List<Dogovor>();
         //словарь соответствия номеров договоров к портам
         private Dictionary<Dogovor, Port> _dogovorMap = new Dictionary<Dogovor, Port>();
+        private Dictionary<int,Action<Dogovor>> _systemMethods = new Dictionary<int, Action<Dogovor>>();
 
         public Station(string name)
         {
             Console.WriteLine("Станция запускается...");
             CompanyName = name;
+
             InitializePorts();
+            InitializeSystemNumbers();
+
             Console.WriteLine("Станция запущена!");
             Console.WriteLine();
         }
@@ -41,21 +45,31 @@ namespace ATSLibrary
         /// </summary>
         /// <param name="tariff"></param>
         /// <returns></returns>
-        public Dogovor CreateDogovor(Tariff tariff)
+        public Dogovor CreateDogovor()
         {
-            int number = _dogovors.Count() + 1;
+            int dogovorNumber = _dogovors.Count() + 1;
 
-            //заключаем договор согласно выбранного тарифа (пока подкинем тариф рандомно)
-            Dogovor dogovor = new Dogovor(number, RandomTariff());
+            //(пока подкинем тариф рандомно)
+            Dogovor dogovor = new Dogovor(dogovorNumber, RandomTariff());
 
-            //ищем свободный порт и занимаем его
+            //ищем первый свободный порт и занимаем его
             Port port = _ports.First(x => x.Status == PortStatus.Free);
+
+            if (port == null)
+            {
+                throw new Exception(message: "Закончились свободные порты");
+            }
+
             port.PortStatusChange(PortStatus.Disconnected);
+            //получаем индекс порта в массиве и делаем индекс порядковым номером порта
             int portNumber = Array.IndexOf(_ports, port);
-            port.SetAbonentNumber(number, portNumber, 29000 + portNumber);
+            //привязываем номер договора, абонентский и порядковый номера к порту
+            port.SetAbonentNumber(dogovorNumber, portNumber, 29000 + portNumber);
+            //добавляем договор в список заключенных договоров
             _dogovors.Add(dogovor);
+            //добавляем в словарь соответствие договора порту
             _dogovorMap.Add(dogovor, port);
-          
+
             return dogovor;
         }
 
@@ -65,6 +79,7 @@ namespace ATSLibrary
         /// <returns></returns>
         public Phone GetPhone()
         {
+            //выдает рандомный телефон абоненту
             int index = _random.Next(0, _phoneModels.Length);
             return new Phone(_phoneModels[index]);
         }
@@ -77,24 +92,37 @@ namespace ATSLibrary
         public Port GetMyPort(Dogovor dogovor)
         {
             Port port = _dogovorMap[dogovor];
-
-            if (dogovor.IsPortSet)
+           /*
+            //проверка, что порт по договору уже получен
+            if (dogovor.IsHasPort)
             {
                 throw new Exception(message: $"{port.PortNumber}: Порт зарегистрирован и уже используется!");
             }
 
-            dogovor.IsPortSet = true;
+            dogovor.IsHasPort = true;
+            */
             return port;
         }
 
-        public void ShowHistory(int abonentNumber)
+        /// <summary>
+        /// Показать историю вызовов
+        /// </summary>
+        /// <param name="abonentNumber"></param>
+        public List<Call> GetHistory(int abonentNumber)
         {
-            var history = _billing.GetHistory(abonentNumber);
+            return  _billing.GetHistory(abonentNumber);
+        }
 
-            foreach (var s in history)
-            {
-                Console.WriteLine($"{s.StartDate}|{s.AbonentFrom}=>{s.AbonentTo}|{s.Duration.ToString("HH:mm:ss")}|{s.Amount}BYN");
-            }
+        /// <summary>
+        /// Пополнить баланс
+        /// </summary>
+        /// <param name="dogovor"></param>
+        /// <param name="amount"></param>
+        public void AddMoney(Dogovor dogovor, double amount)
+        {
+            Port port = _dogovorMap[dogovor];
+            Console.Write($"{port.AbonentNumber}: ");
+            dogovor.PayBills(amount);
         }
 
         /// <summary>
@@ -117,6 +145,26 @@ namespace ATSLibrary
          
             Console.WriteLine("Инициализация завершена");
             Console.WriteLine();
+        }
+
+        /// <summary>
+        /// Инициализация системных функций, которые абонент может вызвать набрав номер
+        /// </summary>
+        private void InitializeSystemNumbers()
+        {
+            _systemMethods.Add(100, ShowBalance);
+        }
+
+        /// <summary>
+        /// Показать баланс абонента
+        /// </summary>
+        /// <param name="port"></param>
+        private void ShowBalance(Dogovor dogovor)
+        {
+            Port port = _dogovorMap[dogovor];
+            double balance = dogovor.Balance;
+            Console.WriteLine($"Баланс абонента {port.AbonentNumber}: {balance} BYN");
+            Console.WriteLine($"Необходимо оплатить до {_billing.LastDayPays}");
         }
 
         /// <summary>
@@ -161,29 +209,41 @@ namespace ATSLibrary
         /// <param name="e"></param>
         private void Sender_OutcomeCall(Port sender, PortEventArgs e)
         {
-            //так неправильно, нужно использовать инкапсуляцию, но чисто в целях экономии времени :))
-            if (e.AbonentNumber == 100)
+            Dogovor dogovor = _dogovors.FirstOrDefault(x => x.DogovorNumber == sender.DogovorNumber);
+
+            //если был набран служебный номер, вызываем метод из словаря служебных номеров
+            if (_systemMethods.ContainsKey(e.AbonentNumber))
             {
-                double balance = _dogovors.First(x => x.DogovorNumber == sender.DogovorNumber).Balance;
-                Console.WriteLine($"Баланс абонента {sender.AbonentNumber}: {balance} BYN");
+                _systemMethods[e.AbonentNumber](dogovor);
                 return;
             }
 
             //ищем порт соответствующий вызываемому номеру
             Port calledPort = _ports.FirstOrDefault(x => x.AbonentNumber == e.AbonentNumber);
 
+            bool isPaid = _billing.IsBillsPaid(dogovor);
+
+            //если неоплачены счета, выходим
+            if (!isPaid)
+            {
+                return;
+            }
+
+            //если номера не существует на станции, выходим
             if (calledPort == null)
             {
                 Console.WriteLine("Вызываемого Вами абонента не существует");
                 return;
             }
 
+            //если номер занят, выходим
             if (calledPort.Status == PortStatus.Busy)
             {
                 Console.WriteLine("Вызываемый Вами абонент занят");
                 return;
             }
 
+            //если номер отключен, выходим
             if (calledPort.Status == PortStatus.Disconnected)
             {
                 Console.WriteLine("Вызываемый Вами абонент недоступен");
@@ -231,7 +291,9 @@ namespace ATSLibrary
         {
             //переменная для импровизированного счетчика чисто для вывода на консоль
             int i = 1;
+            //токен 1го абонента для отмены вызова (завершения таски)
             call.CancelTokenSource = new CancellationTokenSource();
+            //токен 2го абонента для отмены вызова (завершения таски)
             answer.CancelTokenSource = new CancellationTokenSource();
 
             while (true)
@@ -273,9 +335,9 @@ namespace ATSLibrary
             Dogovor dogovor = _dogovors.FirstOrDefault(x => x.DogovorNumber == callingPort.DogovorNumber);
             Tariff tariff = dogovor.Tariff;
             double amount = CalculateCallAmount(tariff,timeFinish - timeStart);
-            _billing.PayCall(dogovor, amount);
+            _billing.TakeCallPrice(dogovor, amount);
             _billing.AddCall(new Call(tariff, timeStart,timeFinish, callingPort.AbonentNumber, answerPort.AbonentNumber,amount));
-            Console.WriteLine($"Звонок завершен. Баланс {callingPort.AbonentNumber}: {dogovor.Balance} BYN");
+            Console.WriteLine($"Звонок завершен. Баланс абонента {callingPort.AbonentNumber}: {dogovor.Balance} BYN");
         }
 
         /// <summary>

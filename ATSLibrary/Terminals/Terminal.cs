@@ -46,7 +46,7 @@ namespace ATSLibrary.Terminals
 
             if (_port == null)
             {
-                Console.WriteLine($"Порт для устройства не найден!");
+                Console.WriteLine($"Устройство не подключено к порту!");
                 return;
             }
 

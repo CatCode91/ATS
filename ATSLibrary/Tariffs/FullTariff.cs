@@ -9,6 +9,6 @@ namespace ATSLibrary.Tariffs
     public class FullTariff : Tariff
     {
         public override string Name => @"""Бизнес""";
-        public override double Rate => 1.4;
+        public override double Rate => 0.1;
     }
 }

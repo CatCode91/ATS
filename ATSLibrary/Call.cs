@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ATSLibrary
 {
-    internal class Call
+    public class Call
     {
         public Call(Tariff tariff, DateTime startDate,DateTime finishDate, int fromAbonentNumber, int toAbonentNumber, double amount)
         {
@@ -16,6 +16,8 @@ namespace ATSLibrary
             Duration = finishDate - startDate;
             AbonentFrom = fromAbonentNumber;
             AbonentTo = toAbonentNumber;
+            Tariff = tariff;
+            Amount = amount;
         }
 
         public DateTime StartDate { get; private set; }
@@ -24,6 +26,6 @@ namespace ATSLibrary
         public Tariff Tariff { get; private set; }
         public int AbonentFrom { get; private set; }
         public int AbonentTo { get; private set; }
-        public int Amount { get; private set; }
+        public double Amount { get; private set; }
     }
 }
