@@ -34,7 +34,7 @@ namespace ATSLibrary
         /// <param name="terminal"></param>
         internal void ConnectTerminal(ITerminal terminal)
         {
-                PortConnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Устройство подключено к порту!"));
+                PortConnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал {terminal.Name} подключен к порту!"));
         }      
       
         /// <summary>
@@ -44,7 +44,7 @@ namespace ATSLibrary
         /// <param name="port"></param>
         internal void DisconnectTerminal(ITerminal terminal)
         {
-            PortDisconnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал отключен от порта!"));
+            PortDisconnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал {terminal.Name} отключен от порта!"));
         }
 
         /// <summary>

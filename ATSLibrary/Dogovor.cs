@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 namespace ATSLibrary
 {
     public class Dogovor
-    {
-        private DateTime _lastDateDebtCounted = DateTime.Now;
-
+    { 
         internal Dogovor(int dogovorNumber, Tariff tariff)
         {
             Balance = 0.00;
@@ -19,26 +17,61 @@ namespace ATSLibrary
             DateOfCreation = DateTime.Today;
         }
 
+        /// <summary>
+        /// Номер договора
+        /// </summary>
         public int DogovorNumber
         {
             get;
         } 
+
+        /// <summary>
+        /// Дата заключения договора
+        /// </summary>
         public DateTime DateOfCreation
         {
             get;
             private set;
         }
-        public Tariff Tariff { get; private set; }
-        internal double Balance
+
+        /// <summary>
+        /// Тарифный план
+        /// </summary>
+        public Tariff Tariff
         {
             get;
             private set;
         }
 
-        //должен быть либо 0 либо отрицательным числом (задолженность)
-        internal double Debt { get; private set; } = 0;
+        /// <summary>
+        /// Денежные средства на балансе
+        /// </summary>
+        internal double Balance
+        {
+            get;
+            private set;
+        } = 0;
 
-        //смена тарифного плана
+        //должен быть либо 0 либо отрицательным числом (задолженность)
+        internal double Debt
+        {
+            get;
+            private set;
+        } = 0;
+
+        /// <summary>
+        /// Дата, когда последний раз по счету устанавливалась задолженность
+        /// </summary>
+        internal DateTime LastDateDebtCounted
+        {
+            get;
+            private set;
+        } = DateTime.Now;
+
+        /// <summary>
+        /// Сменить тарифный план
+        /// </summary>
+        /// <param name="tariff">Тарифный план</param>
         public void ChangeTariff(Tariff tariff)
         {
             var today = DateTime.Today;
@@ -62,31 +95,31 @@ namespace ATSLibrary
 
         }
 
-        //оплата долгов
+        /// <summary>
+        /// Пополнение счета
+        /// </summary>
+        /// <param name="sum"></param>
         internal void PayBills(double sum)
         {
             Debt += sum;
 
             //если внесено с запасом(долг больше 0), то остаток идет на баланс
-            
             if (Debt > 0)
             {
-                Balance += Math.Abs(Debt);
+                Balance += Debt;
                 Debt = 0;
             }
 
-            Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance + Debt} BYN");
+            //отображаем баланс с учетом задолженности
+            Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance+Debt} BYN");
         }
 
-        //установка размера задолженности
+        /// <summary>
+        /// Установить задолженность по договору
+        /// </summary>
+        /// <param name="sum"></param>
         internal void SetDebt(double sum)
         {
-            if (_lastDateDebtCounted.Month == DateTime.Now.Month)
-            {
-                Console.WriteLine("Договор заключен в текущем месяце, либо уже производился расчет задолженности!");
-                return;
-            }
-
             Debt = -sum;
 
             //если в момент подсчета на балансе есть деньги, списываем их на покрытие долга
@@ -96,8 +129,7 @@ namespace ATSLibrary
                 Balance = 0;
             }
 
-            _lastDateDebtCounted = DateTime.Now;
-            Console.WriteLine($"Рассчет задолженности произведен, размер долга состалвяет! {Debt} BYN") ;
+            LastDateDebtCounted = DateTime.Now;
         }
     }
 }

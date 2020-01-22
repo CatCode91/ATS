@@ -9,10 +9,11 @@ namespace ATSLibrary
 {
     internal class Billing
     {
+        //список всех завершенных вызовов на станции
         private List<Call> _journal = new List<Call>();
 
         //день расчета задолженности
-        internal int LastPayDay { get; } = 22;
+        internal int LastPayDay => 22;
 
         /// <summary>
         /// Добавляет запись в историю звонков
@@ -25,9 +26,9 @@ namespace ATSLibrary
         }
 
         /// <summary>
-        /// Возвращает историю по номеру телефона
+        /// Возвращает список совершенных звонков 
         /// </summary>
-        /// <param name="number"></param>
+        /// <param name="number">Номер телефона</param>
         /// <returns></returns>
         internal List<Call> GetHistory(int number)
         {
@@ -41,9 +42,9 @@ namespace ATSLibrary
         /// </summary>
         /// <param name="dogovor"></param>
         /// <returns></returns>
-        internal bool IsBillsPaid(Dogovor dogovor)
+        internal bool IsBillsPaid(int debt)
         {
-            return (dogovor.Debt >= 0) ? true : false;
+            return (debt >= 0) ? true : false;
         }
 
         /// <summary>
@@ -52,9 +53,9 @@ namespace ATSLibrary
         /// <param name="tariff">Текущий тариф абонента</param>
         /// <param name="duration">Длительность звонка</param>
         /// <returns></returns>
-        internal double GetCurrentCallPrice(Tariff tariff,TimeSpan duration)
+        internal double GetCallPrice(Tariff tariff,TimeSpan duration)
         {
-            return tariff.Rate * duration.TotalSeconds;
+            return duration.TotalSeconds * tariff.Rate;
         }
 
         /// <summary>
@@ -64,17 +65,20 @@ namespace ATSLibrary
         /// <param name="port"></param>
         /// <param name="date"></param>
         /// <returns></returns>
-        internal double CountBillLastMonth(Dogovor dogovor)
+        internal double GetBillLastMonth(int dogovorNumber)
        {
+            //прошлый месяц
+            DateTime date = DateTime.Now.AddMonths(-1);
+
             //дата начала прошлого месяца
-            DateTime firstDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month -1 , 1);
+            DateTime firstDate = new DateTime(date.Year, date.Month, 1);
             
             //дата конца прошлого месяца
             DateTime lastDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1).AddDays(-1);
 
             //фильтруем журнал по дате, затем по номеру договора
             var dateFilter = _journal.Where(x => (x.StartDate >= firstDate) & (x.StartDate <= lastDate));
-            var abonentFilter = dateFilter.Where(x => x.Dogovor.DogovorNumber == dogovor.DogovorNumber);
+            var abonentFilter = dateFilter.Where(x => x.DogovorNumber == dogovorNumber);
 
             double amount = 0;
             
@@ -93,10 +97,23 @@ namespace ATSLibrary
         /// <param name="dogovors"></param>
         internal void CountDebtsForAbonents(IEnumerable<Dogovor> dogovors)
         {
+            if (DateTime.Now.Day != LastPayDay)
+            {
+                Console.WriteLine($"Сегодня не {LastPayDay} число!");
+                return;
+            }
+
             foreach (Dogovor dogovor in dogovors)
             {
-                double summ = CountBillLastMonth(dogovor);
+                if (dogovor.LastDateDebtCounted.Month == DateTime.Now.Month)
+                {
+                    Console.WriteLine("Договор заключен в текущем месяце, либо уже производился расчет задолженности!");
+                    continue;
+                }
+
+                double summ = GetBillLastMonth(dogovor.DogovorNumber);
                 dogovor.SetDebt(summ);
+                Console.WriteLine($"Размер долга по договору № {dogovor.DogovorNumber } составляет: {dogovor.Debt} BYN");
             }
         }
     }

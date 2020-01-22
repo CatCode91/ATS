@@ -77,8 +77,9 @@ namespace ATSLibrary.Terminals
         }
 
         /// <summary>
-        /// Подвердить прием входящего вызова
+        /// Подтвердить/отклонить входящий вызов
         /// </summary>
+        /// <param name="accepted">True - подвердить, False - отклонить</param>
         public void SendAcceptCall(bool accepted)
         {
             _port.SendAccept(accepted);

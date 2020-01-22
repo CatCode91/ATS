@@ -12,8 +12,8 @@ namespace ATSLibrary
     public class Station
     {
         private Random _random = new Random();
-        //список выдаваемых станцией моделей телефонов
-        private string[] _phoneModels = { "Alcatel", "BlackBerry", "iPhone", "Motorola", "Nokia", "Samsung", "Xiaomi" };
+        //объект магазина или склада (там хранятся терминалы)
+        private Store _store = new Store();
         //поле,указывающее подтвердил ли вызов вызываемый абонент
         private (bool,Port) _acceptedCall;
         //объект биллинговой системы
@@ -24,7 +24,8 @@ namespace ATSLibrary
         private List<Dogovor> _dogovors = new List<Dogovor>();
         //словарь соответствия номеров договоров к портам
         private Dictionary<Dogovor, Port> _dogovorMap = new Dictionary<Dogovor, Port>();
-        private Dictionary<int,Action<Dogovor>> _systemMethods = new Dictionary<int, Action<Dogovor>>();
+        //словарь соответствия номеров телефонов для вызова служебных функций
+        private Dictionary<int, Action<Dogovor>> _systemMethods = new Dictionary<int, Action<Dogovor>>();
 
         public Station(string name)
         {
@@ -38,7 +39,10 @@ namespace ATSLibrary
             Console.WriteLine();
         }
 
-        public string CompanyName { get; }
+        public string CompanyName
+        {
+            get;
+        }
 
         /// <summary>
         /// Заключить новый договор
@@ -47,7 +51,7 @@ namespace ATSLibrary
         /// <returns></returns>
         public Dogovor CreateDogovor()
         {
-            int dogovorNumber = _dogovors.Count() + 1;
+            int dogovorNumber = _dogovors.Count();
 
             //(пока подкинем тариф рандомно)
             Dogovor dogovor = new Dogovor(dogovorNumber, RandomTariff());
@@ -79,19 +83,14 @@ namespace ATSLibrary
         /// <returns></returns>
         public Phone GetPhone()
         {
-            //выдает рандомный телефон абоненту
-            int index = _random.Next(0, _phoneModels.Length);
-            return new Phone(_phoneModels[index]);
+            return _store.GetPhone();
         }
 
+        /// <summary>
+        /// Посчитать задолженность по абонентам
+        /// </summary>
         public void CountDebts()
         {
-            if (DateTime.Now.Day != _billing.LastPayDay)
-            {
-                Console.WriteLine($"Сегодня не {_billing.LastPayDay} число!");
-                return;
-            }
-
             _billing.CountDebtsForAbonents(_dogovors);
         }
 
@@ -100,18 +99,9 @@ namespace ATSLibrary
         /// </summary>
         /// <param name="dogovor"></param>
         /// <returns></returns>
-        public Port GetMyPort(Dogovor dogovor)
+        public Port GetPort(Dogovor dogovor)
         {
             Port port = _dogovorMap[dogovor];
-           /*
-            //проверка, что порт по договору уже получен
-            if (dogovor.IsHasPort)
-            {
-                throw new Exception(message: $"{port.PortNumber}: Порт зарегистрирован и уже используется!");
-            }
-
-            dogovor.IsHasPort = true;
-            */
             return port;
         }
 
@@ -159,7 +149,7 @@ namespace ATSLibrary
         }
 
         /// <summary>
-        /// Инициализация системных функций, которые абонент может вызвать набрав номер
+        /// Инициализация системных номеров
         /// </summary>
         private void InitializeSystemNumbers()
         {
@@ -169,14 +159,15 @@ namespace ATSLibrary
         /// <summary>
         /// Показать баланс абонента
         /// </summary>
-        /// <param name="port"></param>
+        /// <param name="dogovor"></param>
         private void ShowBalance(Dogovor dogovor)
         {
             Port port = _dogovorMap[dogovor];
             double balance = dogovor.Balance;
             Console.WriteLine($"Баланс абонента {port.AbonentNumber}: {balance} BYN");
-            Console.WriteLine($"Метод расчета кредитный");
-            Console.WriteLine($"Расчет стоимости услуг за прошлый месяц производится {_billing.LastPayDay} числа текущего месяца");
+            Console.WriteLine($"Задолженность составляет: {dogovor.Debt} BYN");
+            Console.WriteLine($"Метод расчета: кредитный");
+            Console.WriteLine($"Расчет стоимости услуг за текущий месяц производится {_billing.LastPayDay} числа следующего месяца");
         }
 
         /// <summary>
@@ -193,16 +184,6 @@ namespace ATSLibrary
         }
 
         /// <summary>
-        /// Событие ответа вызываемого абонента на вызов
-        /// </summary>
-        /// <param name="accept">Принял абонент вызов или отклонил</param>
-        /// <returns></returns>
-        private void Sender_CallAccepted(Port sender, bool accept)
-        {
-            _acceptedCall = (accept,sender);
-        }
-
-        /// <summary>
         /// Метод для события, возникающего при отключения терминала от порта
         /// </summary>
         /// <param name="sender"></param>
@@ -210,8 +191,19 @@ namespace ATSLibrary
         private void Station_PortDisconnected(Port sender, PortEventArgs e)
         {
             sender.OutcomeCall -= Sender_OutcomeCall;
+            sender.CallAccepted -= Sender_CallAccepted;
             Console.WriteLine(e.Message);
             sender.PortStatusChange(PortStatus.Disconnected);
+        }
+
+        /// <summary>
+        /// Событие ответа вызываемого абонента на вызов
+        /// </summary>
+        /// <param name="accept">Принял абонент вызов или отклонил</param>
+        /// <returns></returns>
+        private void Sender_CallAccepted(Port sender, bool accept)
+        {
+            _acceptedCall = (accept,sender);
         }
 
         /// <summary>
@@ -230,17 +222,16 @@ namespace ATSLibrary
                 return;
             }
 
-            bool isPaid = _billing.IsBillsPaid(dogovor);
+            bool isPaid = _billing.IsBillsPaid(dogovor.DogovorNumber);
             //если неоплачены счета, выходим
             if (!isPaid)
             {
+                Console.WriteLine($"Оплатите долг! {dogovor.Debt} BYN");
                 return;
             }
 
             //ищем порт соответствующий вызываемому номеру
             Port calledPort = _ports.FirstOrDefault(x => x.AbonentNumber == e.AbonentNumber);
-
-            
 
             //если номера не существует на станции, выходим
             if (calledPort == null)
@@ -291,7 +282,12 @@ namespace ATSLibrary
         {
             Console.WriteLine("Начат разговор");
             DateTime timeStart = DateTime.Now;
+            //устанавливаем статус "занято" по обоим портам и соединяем абонентов
+            callingPort.PortStatusChange(PortStatus.Busy);
+            answerPort.PortStatusChange(PortStatus.Busy);
             await Task.Run(() => Talking(callingPort, answerPort));
+
+            //завершаем разговор после выполнения таски
             FinishDialog(callingPort, answerPort, timeStart);
         }
 
@@ -302,7 +298,7 @@ namespace ATSLibrary
         /// <param name="answer"></param>
         private void Talking(Port call, Port answer)
         {
-            //переменная для импровизированного счетчика чисто для вывода на консоль
+            //переменная для импровизированного счетчика секунд, чисто для вывода на консоль
             int i = 1;
             //токен 1го абонента для отмены вызова (завершения таски)
             call.CancelTokenSource = new CancellationTokenSource();
@@ -311,14 +307,14 @@ namespace ATSLibrary
 
             while (true)
             {
-                if (call.CancelTokenSource.Token.IsCancellationRequested)
+                if (call.CancelTokenSource.Token.IsCancellationRequested || call.Status == PortStatus.Disconnected)
                 {
                     Console.WriteLine();
                     Console.WriteLine($"Вызов завершен абонентом {call.AbonentNumber}");
                     return;
                 }
 
-                if (answer.CancelTokenSource.Token.IsCancellationRequested)
+                if (answer.CancelTokenSource.Token.IsCancellationRequested || answer.Status == PortStatus.Disconnected)
                 {
                     Console.WriteLine();
                     Console.WriteLine($"Вызов завершен абонентом {answer.AbonentNumber}");
@@ -345,12 +341,21 @@ namespace ATSLibrary
             callingPort.CancelTokenSource.Dispose();
             answerPort.CancelTokenSource.Dispose();
 
+            //устанавливаем статус на порт в зависимости от причины завершения вызова
+            // (абонент завершил его корректно или отключил терминал от порта)
+            PortStatus statusC = (callingPort.Status != PortStatus.Busy) ? callingPort.Status : PortStatus.Connected;
+            PortStatus statusA = (answerPort.Status != PortStatus.Busy) ? callingPort.Status : PortStatus.Connected;
+            callingPort.PortStatusChange(statusC);
+            answerPort.PortStatusChange(statusA);
+
+
             //заносим вызов в журнал
             DateTime timeFinish = DateTime.Now; 
             Dogovor dogovor = _dogovors.FirstOrDefault(x => x.DogovorNumber == callingPort.DogovorNumber);
             Tariff tariff = dogovor.Tariff;
-            double amount = _billing.GetCurrentCallPrice(tariff,timeFinish - timeStart);
-            Call call = new Call(dogovor, tariff, timeStart, timeFinish, callingPort.AbonentNumber, answerPort.AbonentNumber, amount);
+            double amount =  _billing.GetCallPrice(tariff,timeFinish - timeStart);
+            amount = Math.Round(amount, 2);
+            Call call = new Call(dogovor.DogovorNumber, tariff, timeStart, timeFinish, callingPort.AbonentNumber, answerPort.AbonentNumber, amount);
             _billing.AddCallToJournal(call);
             Console.WriteLine($"Звонок завершен. Стоимость звонка {amount}");
         }
@@ -366,9 +371,6 @@ namespace ATSLibrary
             Tariff tariff = Activator.CreateInstance(Type.GetType(allDerivedTypes[_random.Next(0, allDerivedTypes.Length)].FullName)) as Tariff;
             return tariff;
         }
-
-      
-       
     }
 }
 
