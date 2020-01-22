@@ -29,8 +29,9 @@ namespace ATS
                 Console.WriteLine();
                 Console.WriteLine("1. Подключить терминал к порту \t 4. Совершить звонок  \t 7. Журнал вызовов");
                 Console.WriteLine("2. Отключить терминал от порта \t 5. Узнать баланс \t 8. Смена тариф. плана");
-                Console.WriteLine("3. Подключить все терминалы \t 6. Пополнить счет \t 9. Выйти из программы");
+                Console.WriteLine("3. Подключить все терминалы \t 6. Пополнить счет \t 9. Расчет по всем");
                 Console.WriteLine();
+                Console.WriteLine("10. Выйти из программы");
                 Console.WriteLine("Пункт меню:");
 
                 try
@@ -64,6 +65,9 @@ namespace ATS
                             ChangeTariff(abonents);
                             break;
                         case 9:
+                            CountDebts(ats);
+                            break;
+                        case 10:
                             isWorking = false;
                             continue;
                     }
@@ -74,6 +78,19 @@ namespace ATS
                     Console.WriteLine(ex.Message);
                 }
             }
+        }
+
+        private static void CountDebts(Station ats)
+        {
+            ats.CountDebts();
+        }
+
+        private enum Filter
+        {
+            FilterByDate,
+            FilterByAmount,
+            FilterByAbonent,
+            FilterReset
         }
 
         private static void PayBill(Station ats, Abonent[] abonents)
@@ -111,6 +128,12 @@ namespace ATS
             tariffs[2] = new FullTariff();
 
             Console.WriteLine("Выберите номер нового тарифного плана: ");
+
+            for (int i = 0; i < tariffs.Length; i++)
+            {
+                Console.WriteLine($"{i+1} {tariffs[i].Name}");
+            }
+
             int current = Convert.ToInt32(Console.ReadLine());
             currentAbonent.Dogovor.ChangeTariff(tariffs[current]);
         }
@@ -315,14 +338,6 @@ namespace ATS
                     sender.SendAcceptCall(false);
                     break;
             }
-        }
-
-        enum Filter
-        {
-            FilterByDate,
-            FilterByAmount,
-            FilterByAbonent,
-            FilterReset
         }
     }
 }

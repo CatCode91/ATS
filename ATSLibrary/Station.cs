@@ -84,6 +84,17 @@ namespace ATSLibrary
             return new Phone(_phoneModels[index]);
         }
 
+        public void CountDebts()
+        {
+            if (DateTime.Now.Day != _billing.LastPayDay)
+            {
+                Console.WriteLine($"Сегодня не {_billing.LastPayDay} число!");
+                return;
+            }
+
+            _billing.CountDebtsForAbonents(_dogovors);
+        }
+
         /// <summary>
         /// Получить порт для подключения пользовательских терминалов согласно договора 
         /// </summary>
@@ -164,7 +175,8 @@ namespace ATSLibrary
             Port port = _dogovorMap[dogovor];
             double balance = dogovor.Balance;
             Console.WriteLine($"Баланс абонента {port.AbonentNumber}: {balance} BYN");
-            Console.WriteLine($"Необходимо оплатить до {_billing.LastDayPays}");
+            Console.WriteLine($"Метод расчета кредитный");
+            Console.WriteLine($"Расчет стоимости услуг за прошлый месяц производится {_billing.LastPayDay} числа текущего месяца");
         }
 
         /// <summary>
@@ -218,16 +230,17 @@ namespace ATSLibrary
                 return;
             }
 
-            //ищем порт соответствующий вызываемому номеру
-            Port calledPort = _ports.FirstOrDefault(x => x.AbonentNumber == e.AbonentNumber);
-
             bool isPaid = _billing.IsBillsPaid(dogovor);
-
             //если неоплачены счета, выходим
             if (!isPaid)
             {
                 return;
             }
+
+            //ищем порт соответствующий вызываемому номеру
+            Port calledPort = _ports.FirstOrDefault(x => x.AbonentNumber == e.AbonentNumber);
+
+            
 
             //если номера не существует на станции, выходим
             if (calledPort == null)
@@ -328,16 +341,18 @@ namespace ATSLibrary
         /// <param name="timeStart"></param>
         private void FinishDialog(Port callingPort, Port answerPort, DateTime timeStart)
         {
+            //освобождаем токены для отмены
             callingPort.CancelTokenSource.Dispose();
             answerPort.CancelTokenSource.Dispose();
 
+            //заносим вызов в журнал
             DateTime timeFinish = DateTime.Now; 
             Dogovor dogovor = _dogovors.FirstOrDefault(x => x.DogovorNumber == callingPort.DogovorNumber);
             Tariff tariff = dogovor.Tariff;
-            double amount = CalculateCallAmount(tariff,timeFinish - timeStart);
-            _billing.TakeCallPrice(dogovor, amount);
-            _billing.AddCall(new Call(tariff, timeStart,timeFinish, callingPort.AbonentNumber, answerPort.AbonentNumber,amount));
-            Console.WriteLine($"Звонок завершен. Баланс абонента {callingPort.AbonentNumber}: {dogovor.Balance} BYN");
+            double amount = _billing.GetCurrentCallPrice(tariff,timeFinish - timeStart);
+            Call call = new Call(dogovor, tariff, timeStart, timeFinish, callingPort.AbonentNumber, answerPort.AbonentNumber, amount);
+            _billing.AddCallToJournal(call);
+            Console.WriteLine($"Звонок завершен. Стоимость звонка {amount}");
         }
 
         /// <summary>
@@ -352,15 +367,8 @@ namespace ATSLibrary
             return tariff;
         }
 
-        /// <summary>
-        /// Подсчет суммы, потраченной на звонок
-        /// </summary>
-        /// <param name="tariff">Текущий тариф абонента</param>
-        /// <param name="duration">Длительность звонка</param>
-        /// <returns></returns>
-        private double CalculateCallAmount(Tariff tariff,TimeSpan duration)
-        {
-            return duration.Seconds * tariff.Rate;
-        } 
+      
+       
     }
 }
+

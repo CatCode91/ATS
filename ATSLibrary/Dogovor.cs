@@ -9,7 +9,7 @@ namespace ATSLibrary
 {
     public class Dogovor
     {
-        private double _debt;
+        private DateTime _lastDateDebtCounted = DateTime.Now;
 
         internal Dogovor(int dogovorNumber, Tariff tariff)
         {
@@ -35,24 +35,10 @@ namespace ATSLibrary
             private set;
         }
 
-        internal double Debt
-        {
-            get
-            {
-                return _debt;
-            }
+        //должен быть либо 0 либо отрицательным числом (задолженность)
+        internal double Debt { get; private set; } = 0;
 
-            set
-            {
-                _debt = value;
-
-                if (_debt < 0 )
-                {
-                    Balance += Math.Abs(_debt);
-                }
-            }
-        }
-
+        //смена тарифного плана
         public void ChangeTariff(Tariff tariff)
         {
             var today = DateTime.Today;
@@ -71,15 +57,47 @@ namespace ATSLibrary
 
             else
             {
-                Console.WriteLine($"К сожалению, тариф можно изменить только раз в месяц (не раньше {_dateOfCreation.AddMonths(1).ToShortDateString()})");
+                Console.WriteLine($"К сожалению, тариф можно изменить только раз в месяц (не раньше {DateOfCreation.AddMonths(1).ToShortDateString()})");
             }
 
         }
 
+        //оплата долгов
         internal void PayBills(double sum)
         {
-            Debt -= sum;
-            Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance} BYN");
+            Debt += sum;
+
+            //если внесено с запасом(долг больше 0), то остаток идет на баланс
+            
+            if (Debt > 0)
+            {
+                Balance += Math.Abs(Debt);
+                Debt = 0;
+            }
+
+            Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance + Debt} BYN");
+        }
+
+        //установка размера задолженности
+        internal void SetDebt(double sum)
+        {
+            if (_lastDateDebtCounted.Month == DateTime.Now.Month)
+            {
+                Console.WriteLine("Договор заключен в текущем месяце, либо уже производился расчет задолженности!");
+                return;
+            }
+
+            Debt = -sum;
+
+            //если в момент подсчета на балансе есть деньги, списываем их на покрытие долга
+            if (Balance > 0)
+            {
+                Debt += Balance;
+                Balance = 0;
+            }
+
+            _lastDateDebtCounted = DateTime.Now;
+            Console.WriteLine($"Рассчет задолженности произведен, размер долга состалвяет! {Debt} BYN") ;
         }
     }
 }
