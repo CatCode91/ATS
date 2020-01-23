@@ -11,7 +11,10 @@ namespace ATSLibrary
         /// <summary>
         /// Имя устройства
         /// </summary>
-        string Name { get; }
+        string Name
+        {
+            get;
+        }
 
         /// <summary>
         /// Подключить к порту

@@ -6,13 +6,24 @@ namespace ATSLibrary
 {
     public class Port
     {
+        /// <summary>
+        /// Происходит, когда на порт поступает входящий вызов
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="abonentNumber">номер вызывающего абонента</param>
         public delegate void RingAcceptHandle(Port sender, int abonentNumber);
         public event RingAcceptHandle RingNotify;
+
 
         internal event PortStateHandler PortConnected;
         internal event PortStateHandler PortDisconnected;
         internal event PortStateHandler OutcomeCall;
 
+        /// <summary>
+        /// Подтверждение входящего вызова
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="accept"></param>
         internal delegate void СallAcceptHandle(Port sender,bool accept);
         internal event СallAcceptHandle CallAccepted;
 
@@ -26,6 +37,8 @@ namespace ATSLibrary
 
         internal int PortNumber { get; private set; }
         internal int DogovorNumber { get; private set; }
+        
+        //токен для отмены активного соединения (разговора)
         internal CancellationTokenSource CancelTokenSource { get; set; }
 
         /// <summary>
@@ -34,7 +47,7 @@ namespace ATSLibrary
         /// <param name="terminal"></param>
         internal void ConnectTerminal(ITerminal terminal)
         {
-                PortConnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал {terminal.Name} подключен к порту!"));
+                PortConnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал {terminal.Name} подключен к порту с абон. номером {AbonentNumber}"));
         }      
       
         /// <summary>
@@ -44,7 +57,7 @@ namespace ATSLibrary
         /// <param name="port"></param>
         internal void DisconnectTerminal(ITerminal terminal)
         {
-            PortDisconnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал {terminal.Name} отключен от порта!"));
+            PortDisconnected?.Invoke(this, new PortEventArgs($"Port №{PortNumber}:  Терминал {terminal.Name} отключен от порта с абон. номером {AbonentNumber}"));
         }
 
         /// <summary>
@@ -90,7 +103,7 @@ namespace ATSLibrary
         }
 
         /// <summary>
-        /// Изменяет статус порта
+        /// Изменяет статус порта (лучше использовать только на станции!)
         /// </summary>
         /// <param name="status"></param>
         internal void PortStatusChange(PortStatus status)

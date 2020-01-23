@@ -15,8 +15,9 @@ namespace ATSLibrary
         private string[] _phoneModels = 
             {
             "Alcatel", "BlackBerry", "iPhone", "Motorola", "Nokia", "Samsung", "Xiaomi"
-             };
+        };
 
+        //выдает рандомный телефон
         internal Phone GetPhone()
         {
             //выдает рандомный телефон абоненту

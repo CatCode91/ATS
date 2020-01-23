@@ -8,16 +8,20 @@ namespace ATSLibrary.Terminals
 {
     public class Terminal : ITerminal
     {
+        //порт, к которому подлючен терминал
         private Port _port;
-
-        public event TerminalStateHandler Ringing;
 
         internal Terminal(string model)
         {
             Name = model.ToString();
         }
 
-        public string Name { get; }
+        public event TerminalStateHandler Ringing;
+
+        public string Name
+        {
+            get;
+        }
 
         /// <summary>
         /// Подключить терминал к порту
@@ -34,7 +38,7 @@ namespace ATSLibrary.Terminals
             Console.WriteLine($"Запрос подключения от {Name}");
             _port = port;
             _port.ConnectTerminal(this);
-            _port.RingNotify += _port_RingNotify;
+            _port.RingNotify += Port_RingNotify;
         }
 
         /// <summary>
@@ -51,7 +55,7 @@ namespace ATSLibrary.Terminals
             }
 
             _port.DisconnectTerminal(this);
-            _port.RingNotify -= _port_RingNotify;
+            _port.RingNotify -= Port_RingNotify;
             _port = null;
         }
 
@@ -92,7 +96,7 @@ namespace ATSLibrary.Terminals
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void _port_RingNotify(Port sender, int number)
+        private void Port_RingNotify(Port sender, int number)
         {
             Ringing?.Invoke(this, new TerminalEventArgs($"Входящий вызов от абонента {number}"));
         }

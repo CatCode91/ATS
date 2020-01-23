@@ -20,13 +20,16 @@ namespace ATSLibrary
             AbonentNumber = abonentNumber;
         }
 
-        public PortEventArgs(bool isCallAccepted)
+        public string Message
         {
-             IsCallAccepted = isCallAccepted;
+            get;
+            private set;
         }
 
-        public string Message { get; private set; }
-        public int AbonentNumber { get; private set; }
-        public bool IsCallAccepted { get; private set; }
+        public int AbonentNumber
+        {
+            get;
+            private set;
+        }  
     }
 }

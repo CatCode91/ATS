@@ -16,6 +16,7 @@ namespace ATSLibrary
             Tariff = tariff;
             DateOfCreation = DateTime.Today;
             DateChangeTariff = DateTime.Today;
+            LastDateDebtCounted = DateTime.Today;
         }
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace ATSLibrary
         {
             get;
             private set;
-        } = 0;
+        }
 
         //должен быть либо 0 либо отрицательным числом (задолженность)
         internal double Debt
@@ -76,7 +77,7 @@ namespace ATSLibrary
         {
             get;
             private set;
-        } = DateTime.Now;
+        }
 
         /// <summary>
         /// Сменить тарифный план
@@ -136,12 +137,14 @@ namespace ATSLibrary
             {
                 Balance += Debt;
 
+                //Если после списания баланс отрицательный превращаем его в долг. Вж-ж-жух!
                 if (Balance <= 0)
                 {
                     Debt = Balance;
                     Balance = 0;
                 }
 
+                //а если нет, то и долга нет и баланс положительный :)
                 else
                 {
                     Debt = 0;

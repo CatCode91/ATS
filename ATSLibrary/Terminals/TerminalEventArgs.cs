@@ -16,19 +16,10 @@ namespace ATSLibrary.Terminals
             Message = message;
         }
 
-        public TerminalEventArgs(bool isCallAccepted)
-        {
-            IsCallAccepted = isCallAccepted;
-        }
-
         public string Message
         {
             get;
         }
-
-        public bool IsCallAccepted
-        {
-            get;
-        }
+ 
     }
 }

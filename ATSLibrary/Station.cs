@@ -14,7 +14,7 @@ namespace ATSLibrary
         private Random _random = new Random();
         //объект магазина или склада (там хранятся терминалы)
         private Store _store = new Store();
-        //поле,указывающее подтвердил ли вызов вызываемый абонент
+        //поле турпл, подтвердил ли вызов вызываемый абонент
         private (bool,Port) _acceptedCall;
         //объект биллинговой системы
         private Billing _billing = new Billing();
@@ -167,6 +167,7 @@ namespace ATSLibrary
             Console.WriteLine($"Баланс абонента {port.AbonentNumber}: {balance} BYN");
             Console.WriteLine($"Задолженность составляет: {dogovor.Debt} BYN");
             Console.WriteLine($"Метод расчета: кредитный");
+            Console.WriteLine($"Тарифный план: {dogovor.Tariff.Name} ( {dogovor.Tariff.Rate} BYN за сек. )");
             Console.WriteLine($"Расчет стоимости услуг за текущий месяц производится {_billing.LastPayDay} числа следующего месяца");
         }
 
@@ -203,8 +204,12 @@ namespace ATSLibrary
         /// <returns></returns>
         private void Sender_CallAccepted(Port sender, bool accept)
         {
+            if (accept)
+            {
+                sender.PortStatusChange(PortStatus.Busy);
+            }
+
             _acceptedCall = (accept,sender);
-            sender.PortStatusChange(PortStatus.Busy);
         }
 
         /// <summary>
@@ -342,13 +347,16 @@ namespace ATSLibrary
             callingPort.CancelTokenSource = null;
             answerPort.CancelTokenSource = null;
 
-             // Устанавливаем статус порта в зависимости от причины завершения разговора
-            // (абонент завершил его корректно или отключил терминал от порта)
-            PortStatus statusC = (callingPort.Status != PortStatus.Busy) ? callingPort.Status : PortStatus.Connected;
-            PortStatus statusA = (answerPort.Status != PortStatus.Busy) ? callingPort.Status : PortStatus.Connected;
-            callingPort.PortStatusChange(statusC);
-            answerPort.PortStatusChange(statusA);
+            //если вызов завершен корректно, то меняем статус
+            if (callingPort.Status == PortStatus.Busy)
+            {
+                callingPort.PortStatusChange(PortStatus.Connected);
+            }
 
+            if (answerPort.Status == PortStatus.Busy)
+            {
+                answerPort.PortStatusChange(PortStatus.Connected);
+            }
 
             //заносим вызов в журнал
             Dogovor dogovor = _dogovors.FirstOrDefault(x => x.DogovorNumber == callingPort.DogovorNumber);

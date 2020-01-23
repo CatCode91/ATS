@@ -11,6 +11,17 @@ namespace ATS
     {
         private readonly Random _random = new Random();
 
+        /// <summary>
+        /// Перечисления для фильтра результатов истории звонков
+        /// </summary>
+        private enum Filter
+        {
+            FilterByDate,
+            FilterByAmount,
+            FilterByAbonent,
+            FilterReset
+        }
+
         static void Main(string[] args)
         {
             //Создаем объект телефонной станции
@@ -19,6 +30,10 @@ namespace ATS
             Menu(ats);
         }
 
+        /// <summary>
+        /// Основное меню программы
+        /// </summary>
+        /// <param name="ats"></param>
         static void Menu(Station ats)
         {
             Abonent[] abonents = CreateDogovors(ats, 10);
@@ -29,11 +44,10 @@ namespace ATS
             {
                 Console.WriteLine();
                 Console.WriteLine();
-                Console.WriteLine("1. Подключить терминал к порту \t 4. Совершить звонок  \t 7. Журнал вызовов");
-                Console.WriteLine("2. Отключить терминал от порта \t 5. Узнать баланс \t 8. Смена тариф. плана");
-                Console.WriteLine("3. Подключить все терминалы \t 6. Пополнить счет \t 9. Расчет задолженностей");
+                Console.WriteLine("1. Подключить терминал \t 4. Узнать баланс  \t 7. Расчет задолженностей");
+                Console.WriteLine("2. Отключить терминал \t 5. Пополнить счет  \t 8. Смена тарифного плана");
+                Console.WriteLine("3. Совершить звонок \t 6. Журнал вызовов \t 9. Выйти из программы ");
                 Console.WriteLine();
-                Console.WriteLine("10. Выйти из программы");
                 Console.WriteLine("Пункт меню:");
 
                 try
@@ -49,29 +63,26 @@ namespace ATS
                             SetTerminalToPorts(abonents, false);
                             break;
                         case 3:
-                            ConnectTerminalsToPorts(abonents);
-                            break;
-                        case 4:
                             MakeDial(abonents);
                             break;
-                        case 5:
+                        case 4:
                             GetBalance(abonents);
                             break;
+                        case 5:
+                            AddMoney(ats, abonents);
+                            break;
                         case 6:
-                            PayBill(ats, abonents);
+                            GetHistory(ats, abonents);
                             break;
                         case 7:
-                            GetHistory(ats, abonents);
+                            ats.CountDebts();
                             break;
                         case 8:
                             ChangeTariff(abonents);
                             break;
                         case 9:
-                            CountDebts(ats);
-                            break;
-                        case 10:
                             isWorking = false;
-                            continue;
+                            continue;     
                     }
                 }
 
@@ -92,22 +103,11 @@ namespace ATS
         }
 
         /// <summary>
-        /// Перечисления для фильтра результатов истории звонков
-        /// </summary>
-        private enum Filter
-        {
-            FilterByDate,
-            FilterByAmount,
-            FilterByAbonent,
-            FilterReset
-        }
-
-        /// <summary>
         /// Пополнить баланс
         /// </summary>
         /// <param name="ats"></param>
         /// <param name="abonents"></param>
-        private static void PayBill(Station ats, Abonent[] abonents)
+        private static void AddMoney(Station ats, Abonent[] abonents)
         {
             Console.WriteLine("Номер договора");
             int number = Convert.ToInt32(Console.ReadLine());
@@ -116,6 +116,7 @@ namespace ATS
 
             Console.WriteLine("Введите сумму:");
             double amount = Convert.ToDouble(Console.ReadLine());
+            amount = Math.Round(amount, 2);
             ats.AddMoney(currentAbonent.Dogovor, amount);
         }
 
@@ -217,6 +218,11 @@ namespace ATS
             }
         }
 
+        /// <summary>
+        /// Применить фильтр к коллекции
+        /// </summary>
+        /// <param name="history"></param>
+        /// <param name="filter"></param>
         private static void ApplyFilter(List<Call> history, Filter filter)
         {
             List<Call> result = new List<Call>();
@@ -245,6 +251,11 @@ namespace ATS
                     break;
             }
 
+            if (result.Count == 0)
+            {
+                Console.WriteLine("Нет результатов");
+            }
+
             foreach (var s in result)
             {
                 Console.WriteLine($"{s.StartDate} \t {s.AbonentFrom}=>{s.AbonentTo} \t {s.Duration.ToString(@"hh\:mm\:ss")} \t {s.Amount} BYN");
@@ -260,6 +271,7 @@ namespace ATS
         private static void GetBalance(Abonent[] abonents)
         {
             Console.WriteLine("Позвоните по номеру 100 :)");
+            Console.ReadKey();
         }
 
         /// <summary>
@@ -289,13 +301,16 @@ namespace ATS
         private static void SetTerminalToPorts(Abonent[] abonents, bool isConnect)
         {
             Console.WriteLine("Номер договора");
+
             int number = Convert.ToInt32(Console.ReadLine());
 
             Abonent currentAbonent = abonents[number];
+
             if (isConnect)
             {
                 currentAbonent.Terminal.ConnectPort(currentAbonent.Port);
             }
+
             else
             {
                 currentAbonent.Terminal.DisconnectPort();
@@ -306,7 +321,7 @@ namespace ATS
         /// Создает указанное количество абонентов
         /// </summary>
         /// <param name="ats"></param>
-        /// <param name="count"></param>
+        /// <param name="count">Количество абонентов</param>
         private static Abonent[] CreateDogovors(Station ats, int count)
         {
             Abonent[] abonents = new Abonent[count];
@@ -321,14 +336,16 @@ namespace ATS
                 Console.WriteLine($"{i} - Договор №{dogovor.DogovorNumber} Номер: {port.AbonentNumber} Тариф: {dogovor.Tariff.Name} Терминал: {phone.Name}");
             }
 
+            Console.WriteLine();
+            //сразу подключаем всех к портам
+            ConnectTerminalsToPorts(abonents);
+
             return abonents;
         }
 
         /// <summary>
-        /// Создает указанное количество абонентов
+        /// Подключает все терминалы из массива к портам
         /// </summary>
-        /// <param name="ats"></param>
-        /// <param name="count"></param>
         private static void ConnectTerminalsToPorts(Abonent[] abonents)
         {
             for (int i = 0; i < abonents.Length; i++)
