@@ -1,9 +1,9 @@
-﻿using ATSLibrary;
-using ATSLibrary.Tariffs;
-using ATSLibrary.Terminals;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using ATSLibrary;
+using ATSLibrary.Tariffs;
+using ATSLibrary.Terminals;
 
 namespace ATS
 {
@@ -39,7 +39,7 @@ namespace ATS
             Abonent[] abonents = CreateDogovors(ats, 10);
 
             bool isWorking = true;
-        
+
             while (isWorking)
             {
                 Console.WriteLine();
@@ -82,7 +82,7 @@ namespace ATS
                             break;
                         case 9:
                             isWorking = false;
-                            continue;     
+                            continue;
                     }
                 }
 
@@ -94,9 +94,9 @@ namespace ATS
         }
 
         /// <summary>
-    /// Подбить долги всех абонентов
-    /// </summary>
-    /// <param name="ats"></param>
+        /// Подбить долги всех абонентов
+        /// </summary>
+        /// <param name="ats"></param>
         private static void CountDebts(Station ats)
         {
             ats.CountDebts();
@@ -115,7 +115,7 @@ namespace ATS
             Abonent currentAbonent = abonents[number];
 
             Console.WriteLine("Введите сумму:");
-            double amount = Convert.ToDouble(Console.ReadLine());
+            decimal amount = Convert.ToDecimal(Console.ReadLine());
             amount = Math.Round(amount, 2);
             ats.AddMoney(currentAbonent.Dogovor, amount);
         }
@@ -226,6 +226,12 @@ namespace ATS
         private static void ApplyFilter(List<Call> history, Filter filter)
         {
             List<Call> result = new List<Call>();
+
+            if (!Enum.IsDefined(typeof(Filter), filter))
+            {
+                return;
+            }
+
             switch (filter)
             {
                 case Filter.FilterByDate:
@@ -236,13 +242,13 @@ namespace ATS
 
                 case Filter.FilterByAmount:
                     Console.WriteLine("Введите сумму:");
-                    double amount = Convert.ToDouble(Console.ReadLine());
+                    decimal amount = Convert.ToDecimal(Console.ReadLine());
                     result = history.FindAll(x => x.Amount == amount);
                     break;
 
                 case Filter.FilterByAbonent:
                     Console.WriteLine("Введите номер абонента:");
-                    double number = Convert.ToDouble(Console.ReadLine());
+                    decimal number = Convert.ToDecimal(Console.ReadLine());
                     result = history.FindAll(x => x.AbonentFrom == number || x.AbonentTo == number);
                     break;
 
@@ -265,9 +271,9 @@ namespace ATS
         }
 
         /// <summary>
-            /// Узнать баланс
-            /// </summary>
-            /// <param name="abonents"></param>
+        /// Узнать баланс
+        /// </summary>
+        /// <param name="abonents"></param>
         private static void GetBalance(Abonent[] abonents)
         {
             Console.WriteLine("Позвоните по номеру 100 :)");
@@ -362,20 +368,17 @@ namespace ATS
         private static void Phone_Ringing(ITerminal sender, TerminalEventArgs e)
         {
             Console.WriteLine($"{sender.Name}: {e.Message}");
-            Console.WriteLine($"Ответить - 1, Сбросить - 2");
+            Console.WriteLine($"Ответить - 1, Сбросить - любая клавиша");
 
-            var command = int.Parse(Console.ReadLine());
+            int command = int.Parse(Console.ReadLine());
+            bool answer = false;
 
-            switch (command)
+            if (command == 1)
             {
-                case 1:
-                    Console.WriteLine("Нажмите любую кнопку для завершения вызова");
-                    sender.SendAcceptCall(true);
-                    break;
-                case 2:
-                    sender.SendAcceptCall(false);
-                    break;
+                answer = true;
             }
+
+            sender.SendAcceptCall(answer);
         }
     }
 }

@@ -1,9 +1,5 @@
 ﻿using ATSLibrary.Tariffs;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ATSLibrary
 {
@@ -11,7 +7,8 @@ namespace ATSLibrary
     { 
         internal Dogovor(int dogovorNumber, Tariff tariff)
         {
-            Balance = 0.00;
+            Balance = 0.00M;
+            Debt = 0.00M;
             DogovorNumber = dogovorNumber;
             Tariff = tariff;
             DateOfCreation = DateTime.Today;
@@ -48,18 +45,18 @@ namespace ATSLibrary
         /// <summary>
         /// Денежные средства на балансе
         /// </summary>
-        internal double Balance
+        internal decimal Balance
         {
             get;
             private set;
         }
 
         //должен быть либо 0 либо отрицательным числом (задолженность)
-        internal double Debt
+        internal decimal Debt
         {
             get;
             private set;
-        } = 0;
+        }
         
         /// <summary>
         /// Дата последнего изменения тарифного плана
@@ -109,7 +106,7 @@ namespace ATSLibrary
         /// Пополнение счета
         /// </summary>
         /// <param name="sum"></param>
-        internal void PayBills(double sum)
+        internal void PayBills(decimal sum)
         {
             Debt += sum;
 
@@ -128,7 +125,7 @@ namespace ATSLibrary
         /// Установить задолженность по договору
         /// </summary>
         /// <param name="sum"></param>
-        internal void SetDebt(double sum)
+        internal void SetDebt(decimal sum)
         {
             Debt -= sum;
 

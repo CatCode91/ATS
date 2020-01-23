@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ATSLibrary.Terminals
 {
@@ -18,6 +14,7 @@ namespace ATSLibrary.Terminals
 
         public event TerminalStateHandler Ringing;
 
+        #region Interface ITerminal implementation
         public string Name
         {
             get;
@@ -90,6 +87,7 @@ namespace ATSLibrary.Terminals
         {
             _port.SendAccept(accepted);
         }
+        #endregion
 
         /// <summary>
         /// Входящий вызов, метод подписаный к событию

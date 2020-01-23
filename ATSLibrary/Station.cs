@@ -3,7 +3,6 @@ using ATSLibrary.Terminals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -119,7 +118,7 @@ namespace ATSLibrary
         /// </summary>
         /// <param name="dogovor"></param>
         /// <param name="amount"></param>
-        public void AddMoney(Dogovor dogovor, double amount)
+        public void AddMoney(Dogovor dogovor, decimal amount)
         {
             Port port = _dogovorMap[dogovor];
             Console.Write($"{port.AbonentNumber}: ");
@@ -163,7 +162,7 @@ namespace ATSLibrary
         private void ShowBalance(Dogovor dogovor)
         {
             Port port = _dogovorMap[dogovor];
-            double balance = dogovor.Balance;
+            decimal balance = dogovor.Balance;
             Console.WriteLine($"Баланс абонента {port.AbonentNumber}: {balance} BYN");
             Console.WriteLine($"Задолженность составляет: {dogovor.Debt} BYN");
             Console.WriteLine($"Метод расчета: кредитный");
@@ -361,7 +360,7 @@ namespace ATSLibrary
             //заносим вызов в журнал
             Dogovor dogovor = _dogovors.FirstOrDefault(x => x.DogovorNumber == callingPort.DogovorNumber);
             Tariff tariff = dogovor.Tariff;
-            double amount =  _billing.GetCallPrice(tariff,timeFinish - timeStart);
+            decimal amount =  _billing.GetCallPrice(tariff,timeFinish - timeStart);
             amount = Math.Round(amount, 2);
             Call call = new Call(dogovor.DogovorNumber, tariff, timeStart, timeFinish, callingPort.AbonentNumber, answerPort.AbonentNumber, amount);
             _billing.AddCallToJournal(call);

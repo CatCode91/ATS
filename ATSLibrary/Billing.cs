@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ATSLibrary
 {
@@ -40,7 +38,7 @@ namespace ATSLibrary
         /// <summary>
         /// Возвращает возможность совершения звонка, учитывая финансовую ситуацию
         /// </summary>
-        internal bool IsBillsPaid(double debt)
+        internal bool IsBillsPaid(decimal debt)
         {
             return (debt >= 0) ? true : false;
         }
@@ -51,22 +49,22 @@ namespace ATSLibrary
         /// <param name="tariff">Текущий тариф абонента</param>
         /// <param name="duration">Длительность звонка</param>
         /// <returns></returns>
-        internal double GetCallPrice(Tariff tariff,TimeSpan duration)
+        internal decimal GetCallPrice(Tariff tariff,TimeSpan duration)
         {
-            return duration.TotalSeconds * tariff.Rate;
+            return Convert.ToDecimal(duration.TotalSeconds) * tariff.Rate;
         }
 
         /// <summary>
         /// Посчитать счет по абоненту за прошлый месяц
         /// </summary>
         /// <returns></returns>
-        internal double GetBillLastMonth(int dogovorNumber,DateTime firstDate,DateTime lastDate)
+        internal decimal GetBillLastMonth(int dogovorNumber,DateTime firstDate,DateTime lastDate)
        {
             //фильтруем журнал по дате, затем по номеру договора
             var dateFilter = _journal.Where(x => (x.StartDate >= firstDate) & (x.StartDate <= lastDate));
             var abonentFilter = dateFilter.Where(x => x.DogovorNumber == dogovorNumber);
 
-            double amount = 0;
+            decimal amount = 0;
             
             //подбиваем сумму за период
             foreach (var i in abonentFilter)
@@ -100,7 +98,7 @@ namespace ATSLibrary
                     continue;
                 }
 
-                double summ = GetBillLastMonth(dogovor.DogovorNumber, firstDate,lastDate);
+                decimal summ = GetBillLastMonth(dogovor.DogovorNumber, firstDate,lastDate);
                 dogovor.SetDebt(summ);
                 Console.WriteLine($"По договору № {dogovor.DogovorNumber } оказано услуг на сумму: {summ} BYN");
             }

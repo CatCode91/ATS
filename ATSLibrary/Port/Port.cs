@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace ATSLibrary
@@ -108,7 +107,10 @@ namespace ATSLibrary
         /// <param name="status"></param>
         internal void PortStatusChange(PortStatus status)
         {
-            Status = status;
+            if (Enum.IsDefined(typeof(PortStatus), status))
+            {
+                Status = status;
+            }  
         }
 
         /// <summary>
