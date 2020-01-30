@@ -116,7 +116,8 @@ namespace ATS
 
             Console.WriteLine("Введите сумму:");
             decimal amount = Convert.ToDecimal(Console.ReadLine());
-            amount = Math.Round(amount, 2);
+            //урезаем до сотых (копеек)
+            amount = Math.Truncate(100 * amount) / 100;
             ats.AddMoney(currentAbonent.Dogovor, amount);
         }
 
