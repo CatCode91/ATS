@@ -23,7 +23,6 @@ namespace ATSLibrary
         public int DogovorNumber
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -32,7 +31,7 @@ namespace ATSLibrary
         public DateTime StartDate
         {
             get;
-            private set;
+
         }
 
         /// <summary>
@@ -41,7 +40,6 @@ namespace ATSLibrary
         public DateTime FinishDate
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -50,7 +48,6 @@ namespace ATSLibrary
         public TimeSpan Duration
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -59,7 +56,6 @@ namespace ATSLibrary
         public Tariff Tariff
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -68,7 +64,6 @@ namespace ATSLibrary
         public int AbonentFrom
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -77,7 +72,6 @@ namespace ATSLibrary
         public int AbonentTo
         {
             get;
-            private set;
         }
 
         /// <summary>
@@ -86,7 +80,6 @@ namespace ATSLibrary
         public decimal Amount
         {
             get;
-            private set;
         }
     }
 }
