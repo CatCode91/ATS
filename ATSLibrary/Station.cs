@@ -168,8 +168,8 @@ namespace ATSLibrary
             decimal balance = dogovor.Balance;
             Console.WriteLine($"Баланс абонента {port.AbonentNumber}: {balance} BYN");
             Console.WriteLine($"Задолженность составляет: {dogovor.Debt} BYN");
-            Console.WriteLine($"Метод расчета: кредитный");
             Console.WriteLine($"Тарифный план: {dogovor.Tariff.Name} ( {dogovor.Tariff.Rate} BYN за сек. )");
+            Console.WriteLine($"Метод расчета: кредитный");
             Console.WriteLine($"Расчет стоимости услуг за текущий месяц производится {_billing.LastPayDay} числа следующего месяца");
         }
 
@@ -370,7 +370,7 @@ namespace ATSLibrary
             Console.WriteLine($"Звонок завершен. Стоимость звонка {amount} BYN");
         }
 
-        /// <summary>
+       /// <summary>
        /// Возвращает рандомный тарифный план
        /// </summary>
        /// <returns></returns>

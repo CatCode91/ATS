@@ -4,7 +4,9 @@ using System;
 namespace ATSLibrary
 {
     public class Dogovor
-    { 
+    {
+        private decimal _debt;
+
         internal Dogovor(int dogovorNumber, Tariff tariff)
         {
             Balance = 0.00M;
@@ -22,7 +24,7 @@ namespace ATSLibrary
         public int DogovorNumber
         {
             get;
-        } 
+        }
 
         /// <summary>
         /// Дата заключения договора
@@ -31,7 +33,7 @@ namespace ATSLibrary
         {
             get;
         }
-        
+
         /// <summary>
         /// Тарифный план
         /// </summary>
@@ -51,12 +53,26 @@ namespace ATSLibrary
         }
 
         //должен быть либо 0 либо отрицательным числом (задолженность)
+        //если больше 0, остаток переносится на баланс
         internal decimal Debt
         {
-            get;
-            private set;
+            get
+            {
+                return _debt;
+            }
+
+            set
+            {
+                _debt = value;
+
+                if (_debt >= 0)
+                {
+                    Balance += _debt;
+                    _debt = 0;
+                }
+            }
         }
-        
+
         /// <summary>
         /// Дата последнего изменения тарифного плана
         /// </summary>
@@ -109,15 +125,9 @@ namespace ATSLibrary
         {
             Debt += sum;
 
-            //если внесено с запасом(долг больше 0), то остаток идет на баланс
-            if (Debt >= 0)
-            {
-                Balance += Debt;
-                Debt = 0;
-            }
-
             //отображаем баланс с учетом задолженности
-            Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance+Debt} BYN");
+            Console.WriteLine($"На счет внесено {sum} BYN. Ваш баланс составляет {Balance} BYN");
+            Console.WriteLine($"Задолженность составляет: {Debt} BYN");
         }
 
         /// <summary>
@@ -145,9 +155,9 @@ namespace ATSLibrary
                 {
                     Debt = 0;
                 }
-            }
 
-            LastDateDebtCounted = DateTime.Now;
+                LastDateDebtCounted = DateTime.Now;
+            }
         }
     }
 }
