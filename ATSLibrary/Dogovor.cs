@@ -30,7 +30,6 @@ namespace ATSLibrary
         public DateTime DateOfCreation
         {
             get;
-            private set;
         }
         
         /// <summary>

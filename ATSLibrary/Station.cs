@@ -29,7 +29,7 @@ namespace ATSLibrary
         public Station(string name)
         {
             Console.WriteLine("Станция запускается...");
-            CompanyName = name;
+            Name = name;
 
             InitializePorts();
             InitializeSystemNumbers();
@@ -37,8 +37,11 @@ namespace ATSLibrary
             Console.WriteLine("Станция запущена!");
             Console.WriteLine();
         }
-
-        public string CompanyName
+        
+        /// <summary>
+        /// Название атс
+        /// </summary>
+        public string Name
         {
             get;
         }

@@ -8,8 +8,8 @@ namespace ATSLibrary
     {
         private Random _random = new Random();
 
-        private string[] _phoneModels = 
-            {
+        private string[] _phoneModels =    
+        {
             "Alcatel", "BlackBerry", "iPhone", "Motorola", "Nokia", "Samsung", "Xiaomi"
         };
 
@@ -18,7 +18,6 @@ namespace ATSLibrary
         {
             //выдает рандомный телефон абоненту
             int index = _random.Next(0, _phoneModels.Length);
-
             return new Phone(_phoneModels[index]);
         }
     }
