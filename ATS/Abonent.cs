@@ -12,8 +12,17 @@ namespace ATS
             Terminal = terminal;
         }
 
-        public Dogovor Dogovor { get; }
-        public Port Port { get; }
-        public Terminal Terminal { get; }
+        public Dogovor Dogovor 
+        { 
+            get; 
+        }
+        public Port Port 
+        { 
+            get; 
+        }
+        public Terminal Terminal 
+        { 
+            get; 
+        }
     }
 }
