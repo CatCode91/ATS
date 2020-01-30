@@ -31,7 +31,6 @@ namespace ATSLibrary
         internal List<Call> GetHistory(int number)
         {
             List<Call> calls = _journal.Where((x => x.AbonentFrom == number || x.AbonentTo == number)).ToList();
-
             return calls;
         }
 
