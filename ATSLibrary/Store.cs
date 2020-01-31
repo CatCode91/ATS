@@ -24,8 +24,5 @@ namespace ATSLibrary
 
             return new Phone(_phoneModels[index]);
         }
-
-
-
     }
 }

@@ -42,7 +42,7 @@ namespace ATSLibrary
         /// </summary>
         /// <param name="dogovor"></param>
         /// <returns></returns>
-        internal bool IsBillsPaid(int debt)
+        internal bool IsBillsPaid(double debt)
         {
             return (debt >= 0) ? true : false;
         }
@@ -97,23 +97,25 @@ namespace ATSLibrary
         /// <param name="dogovors"></param>
         internal void CountDebtsForAbonents(IEnumerable<Dogovor> dogovors)
         {
+            /* на случай если нужно производить расчет именно в конкретную дату
             if (DateTime.Now.Day != LastPayDay)
             {
                 Console.WriteLine($"Сегодня не {LastPayDay} число!");
                 return;
             }
+            */
 
             foreach (Dogovor dogovor in dogovors)
             {
                 if (dogovor.LastDateDebtCounted.Month == DateTime.Now.Month)
                 {
-                    Console.WriteLine("Договор заключен в текущем месяце, либо уже производился расчет задолженности!");
+                    Console.WriteLine("Договор заключен в текущем месяце, либо в этом месяце уже производился расчет задолженности!");
                     continue;
                 }
 
                 double summ = GetBillLastMonth(dogovor.DogovorNumber);
                 dogovor.SetDebt(summ);
-                Console.WriteLine($"Размер долга по договору № {dogovor.DogovorNumber } составляет: {dogovor.Debt} BYN");
+                Console.WriteLine($"По договору № {dogovor.DogovorNumber } оказано услуг на сумму: {summ} BYN");
             }
         }
     }

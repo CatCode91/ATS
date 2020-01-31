@@ -204,6 +204,7 @@ namespace ATSLibrary
         private void Sender_CallAccepted(Port sender, bool accept)
         {
             _acceptedCall = (accept,sender);
+            sender.PortStatusChange(PortStatus.Busy);
         }
 
         /// <summary>
@@ -222,7 +223,7 @@ namespace ATSLibrary
                 return;
             }
 
-            bool isPaid = _billing.IsBillsPaid(dogovor.DogovorNumber);
+            bool isPaid = _billing.IsBillsPaid(dogovor.Debt);
             //если неоплачены счета, выходим
             if (!isPaid)
             {
@@ -282,9 +283,6 @@ namespace ATSLibrary
         {
             Console.WriteLine("Начат разговор");
             DateTime timeStart = DateTime.Now;
-            //устанавливаем статус "занято" по обоим портам и соединяем абонентов
-            callingPort.PortStatusChange(PortStatus.Busy);
-            answerPort.PortStatusChange(PortStatus.Busy);
             await Task.Run(() => Talking(callingPort, answerPort));
 
             //завершаем разговор после выполнения таски
@@ -337,11 +335,14 @@ namespace ATSLibrary
         /// <param name="timeStart"></param>
         private void FinishDialog(Port callingPort, Port answerPort, DateTime timeStart)
         {
-            //освобождаем токены для отмены
-            callingPort.CancelTokenSource.Dispose();
-            answerPort.CancelTokenSource.Dispose();
+            //регистрируем время завершения вызова
+            DateTime timeFinish = DateTime.Now;
 
-            //устанавливаем статус на порт в зависимости от причины завершения вызова
+            //освобождаем токены для прерывания разговора
+            callingPort.CancelTokenSource = null;
+            answerPort.CancelTokenSource = null;
+
+             // Устанавливаем статус порта в зависимости от причины завершения разговора
             // (абонент завершил его корректно или отключил терминал от порта)
             PortStatus statusC = (callingPort.Status != PortStatus.Busy) ? callingPort.Status : PortStatus.Connected;
             PortStatus statusA = (answerPort.Status != PortStatus.Busy) ? callingPort.Status : PortStatus.Connected;
@@ -350,14 +351,13 @@ namespace ATSLibrary
 
 
             //заносим вызов в журнал
-            DateTime timeFinish = DateTime.Now; 
             Dogovor dogovor = _dogovors.FirstOrDefault(x => x.DogovorNumber == callingPort.DogovorNumber);
             Tariff tariff = dogovor.Tariff;
             double amount =  _billing.GetCallPrice(tariff,timeFinish - timeStart);
             amount = Math.Round(amount, 2);
             Call call = new Call(dogovor.DogovorNumber, tariff, timeStart, timeFinish, callingPort.AbonentNumber, answerPort.AbonentNumber, amount);
             _billing.AddCallToJournal(call);
-            Console.WriteLine($"Звонок завершен. Стоимость звонка {amount}");
+            Console.WriteLine($"Звонок завершен. Стоимость звонка {amount} BYN");
         }
 
         /// <summary>

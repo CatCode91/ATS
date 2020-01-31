@@ -145,7 +145,7 @@ namespace ATS
 
             for (int i = 0; i < tariffs.Length; i++)
             {
-                Console.WriteLine($"{i+1} {tariffs[i].Name}");
+                Console.WriteLine($"{i} {tariffs[i].Name}");
             }
 
             int current = Convert.ToInt32(Console.ReadLine());
@@ -278,6 +278,7 @@ namespace ATS
             abonent.Terminal.Dial(dialNumber);
             Console.ReadKey();
             abonent.Terminal.FinishDial();
+            Console.ReadKey();
         }
 
         /// <summary>
@@ -317,7 +318,7 @@ namespace ATS
                 Terminal phone = ats.GetPhone();
                 phone.Ringing += Phone_Ringing;
                 abonents[i] = new Abonent(dogovor, port, phone);
-                Console.WriteLine($"{i} - Договор {dogovor.DogovorNumber} Номер: {port.AbonentNumber} Тариф: {dogovor.Tariff.Name} Терминал: {phone.Name}");
+                Console.WriteLine($"{i} - Договор №{dogovor.DogovorNumber} Номер: {port.AbonentNumber} Тариф: {dogovor.Tariff.Name} Терминал: {phone.Name}");
             }
 
             return abonents;
@@ -353,7 +354,6 @@ namespace ATS
                 case 1:
                     Console.WriteLine("Нажмите любую кнопку для завершения вызова");
                     sender.SendAcceptCall(true);
-                    sender.DisconnectPort();
                     break;
                 case 2:
                     sender.SendAcceptCall(false);

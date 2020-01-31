@@ -51,6 +51,8 @@ namespace ATSLibrary.Terminals
             }
 
             _port.DisconnectTerminal(this);
+            _port.RingNotify -= _port_RingNotify;
+            _port = null;
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace ATSLibrary.Terminals
         /// <param name="number"></param>
         public void Dial(int number)
         {
-            if (_port == null)
+            if (_port == null || _port.Status == PortStatus.Disconnected )
             {
                 Console.WriteLine("Устройство не подключено к порту!");
                 return;

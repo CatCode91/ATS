@@ -15,6 +15,7 @@ namespace ATSLibrary
             DogovorNumber = dogovorNumber;
             Tariff = tariff;
             DateOfCreation = DateTime.Today;
+            DateChangeTariff = DateTime.Today;
         }
 
         /// <summary>
@@ -33,7 +34,7 @@ namespace ATSLibrary
             get;
             private set;
         }
-
+        
         /// <summary>
         /// Тарифный план
         /// </summary>
@@ -58,6 +59,15 @@ namespace ATSLibrary
             get;
             private set;
         } = 0;
+        
+        /// <summary>
+        /// Дата последнего изменения тарифного плана
+        /// </summary>
+        internal DateTime DateChangeTariff
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Дата, когда последний раз по счету устанавливалась задолженность
@@ -74,9 +84,7 @@ namespace ATSLibrary
         /// <param name="tariff">Тарифный план</param>
         public void ChangeTariff(Tariff tariff)
         {
-            var today = DateTime.Today;
-
-            if (today.AddMonths(-1) >= DateOfCreation)
+            if (DateTime.Today.AddMonths(-1) >= DateChangeTariff)
             {
                 if (Tariff == tariff)
                 {
@@ -86,11 +94,12 @@ namespace ATSLibrary
 
                 Tariff = tariff;
                 Console.WriteLine($"Поздравляем! Ваш тариф изменен на - {tariff.Name}");
+                DateChangeTariff = DateTime.Now;
             }
 
             else
             {
-                Console.WriteLine($"К сожалению, тариф можно изменить только раз в месяц (не раньше {DateOfCreation.AddMonths(1).ToShortDateString()})");
+                Console.WriteLine($"К сожалению, тариф можно изменить только раз в месяц (не раньше {DateChangeTariff.AddMonths(1).ToShortDateString()})");
             }
 
         }
@@ -104,7 +113,7 @@ namespace ATSLibrary
             Debt += sum;
 
             //если внесено с запасом(долг больше 0), то остаток идет на баланс
-            if (Debt > 0)
+            if (Debt >= 0)
             {
                 Balance += Debt;
                 Debt = 0;
@@ -120,13 +129,23 @@ namespace ATSLibrary
         /// <param name="sum"></param>
         internal void SetDebt(double sum)
         {
-            Debt = -sum;
+            Debt -= sum;
 
             //если в момент подсчета на балансе есть деньги, списываем их на покрытие долга
             if (Balance > 0)
             {
-                Debt += Balance;
-                Balance = 0;
+                Balance += Debt;
+
+                if (Balance <= 0)
+                {
+                    Debt = Balance;
+                    Balance = 0;
+                }
+
+                else
+                {
+                    Debt = 0;
+                }
             }
 
             LastDateDebtCounted = DateTime.Now;
